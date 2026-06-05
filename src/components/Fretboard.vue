@@ -183,7 +183,6 @@ const frets = ref<string[]>([])
 const emit = defineEmits(['currentFrets', 'currentMidis', 'currentNotes', 'currentChord'])
 
 const _arraysAreEqual = (arr1: number[], arr2: number[]): boolean => {
-  console.log('equal arrs?', arr1.join(), arr2.join(), arr1.join() == arr2.join())
   return arr1.join() == arr2.join()
 }
 const _midi2Name = (midiNumber: number): string => {
@@ -211,11 +210,28 @@ function toggleFret(event: PointerEvent): void {
       elem = event.target
     }
 
+    const stringId = elem?.parentElement?.dataset.stringId
     const fretId = elem?.dataset.fretId
     const classes = elem?.classList
     const dataset = elem?.dataset
 
     if (dataset?.pressed == 'false') {
+      // TODO:
+      // override any other pressed frets on same string
+      // const stringFretsPressed: NodeList = document.querySelectorAll(
+      //   `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
+      // )
+
+      // console.log('stringFretsPressed', stringFretsPressed)
+
+      // if (stringFretsPressed && stringFretsPressed.length) {
+      //   stringFretsPressed.forEach((string: Node) => {
+      //     string.querySelectorAll('.fret').forEach((fret: HTMLElement))
+      //     if (string instanceof HTMLElement) {
+      //       string.dataset.pressed = 'false'
+      //     }
+      //   })
+      // }
       dataset.pressed = 'true'
       classes?.add('pressed')
       frets.value = [...frets.value, fretId ?? '']
@@ -261,8 +277,6 @@ function getChord(midiNums: MidiArray = []): ChordName {
         if (midiNums[0] && midiNums[1] && midiNums[2]) {
           intval1 = midiNums[1] - midiNums[0]
           intval2 = midiNums[2] - midiNums[1]
-
-          console.log('intVals', intval1, intval2)
 
           if (_arraysAreEqual([intval1, intval2], INTERVALS['5'])) {
             chordName = `${_midi2Name(midiNums[0])}5`
