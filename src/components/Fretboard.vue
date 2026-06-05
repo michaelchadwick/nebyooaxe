@@ -27,7 +27,6 @@ class Note {
 type FretArray = string[]
 type MidiNote = number
 type PitchClass = number
-type IntervalsArray = number[]
 type MidiArray = MidiNote[]
 type NoteArray = Note[]
 type ChordName = string

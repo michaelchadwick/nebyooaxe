@@ -3,7 +3,6 @@ import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
 
 type FretArray = string[]
-type PitchClass = number
 type IntervalsArray = number[][]
 type MidiArray = number[]
 type NoteArray = string[]
