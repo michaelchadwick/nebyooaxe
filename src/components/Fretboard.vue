@@ -1,6 +1,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const fretsPressed = ref<string[]>([])
+
+const emit = defineEmits([
+  'currentFrets',
+  'currentMidis',
+  'currentNotes',
+  'currentInvls',
+  'currentChord',
+])
+
 class Note {
   name: string
   frequency: number
@@ -15,7 +25,10 @@ class Note {
   }
 }
 type FretArray = string[]
-type MidiArray = number[]
+type MidiNote = number
+type PitchClass = number
+type IntervalsArray = number[]
+type MidiArray = MidiNote[]
 type NoteArray = Note[]
 type ChordName = string
 
@@ -178,10 +191,6 @@ const INTERVALS = {
   '9sus4': [2, 3, 5],
 }
 
-const fretsPressed = ref<string[]>([])
-
-const emit = defineEmits(['currentFrets', 'currentMidis', 'currentNotes', 'currentChord'])
-
 const _arraysAreEqual = (arr1: number[], arr2: number[]): boolean => {
   return arr1.join() == arr2.join()
 }
@@ -200,6 +209,9 @@ const _midi2Name = (midiNumber: number): string => {
   }
 }
 
+// fret is being pressed or unpressed
+// update frets, midis, notes
+// try to decipher chord(s)
 function toggleFret(event: PointerEvent): void {
   if (event.target instanceof HTMLElement) {
     let elem
@@ -247,8 +259,8 @@ function toggleFret(event: PointerEvent): void {
 
     const noteArray: NoteArray = getNotes()
 
-    const sortedMidis: MidiArray = noteArray
-      .map((note) => note.midi)
+    const unsortedMidis: MidiArray = noteArray.map((note) => note.midi)
+    const sortedMidis: MidiArray = unsortedMidis
       .filter((x): x is number => typeof x === 'number')
       .sort()
     emit('currentMidis', sortedMidis)
@@ -262,126 +274,221 @@ function toggleFret(event: PointerEvent): void {
       .filter((x): x is string => !!x)
     emit('currentNotes', noteNames)
 
-    const midiNumberArray: MidiArray = Array.from(
+    let midiNumberArray: MidiArray = Array.from(
       new Set(noteArray.map((note: Note) => note.midi)),
     ).sort()
     emit('currentChord', getChord(midiNumberArray))
   }
 }
 
-function getChord(midiNums: MidiArray = []): ChordName {
-  if (!midiNums || !midiNums.length) return ''
+const CHORD_PATTERNS: Record<string, string> = {
+  // Triads
+  '0,7': '5',
+  '0,4,7': 'maj',
+  '0,3,7': 'min',
+  '0,3,6': 'dim',
+  '0,4,8': 'aug',
+
+  // Seventh chords
+  '0,4,7,11': 'maj7',
+  '0,4,7,10': '7', // dominant‑7th
+  '0,3,7,10': 'min7',
+  '0,3,6,9': 'hdim7', // half‑diminished
+
+  // Suspensions & added tones
+  '0,2,7': 'sus2',
+  '0,5,7': 'sus4',
+  '0,4,7,14': 'add9',
+  '0,3,7,14': 'minadd9',
+
+  // Extensions (optional)
+  '0,4,7,11,14': 'maj9',
+  '0,3,7,10,14': 'dom9',
+  '0,3,7,10,14,21': 'dom13',
+}
+
+const NOTE_NAMES_SHARP: string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
+const NOTE_NAMES_FLAT: string[] = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+
+function _midiToPitchClass(n: MidiNote): PitchClass {
+  return ((n % 12) + 12) % 12
+}
+function _pitchClassName(pc: PitchClass, useFlat = false): string {
+  if (!NOTE_NAMES_FLAT[pc] || !NOTE_NAMES_SHARP[pc]) return ''
+
+  return useFlat ? NOTE_NAMES_FLAT[pc] : NOTE_NAMES_SHARP[pc]
+}
+
+function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
+  if (!midiNums || !midiNums.length) return ['']
 
   if (midiNums.length > 2) {
-    let chordName: ChordName = ''
-    let intval1, intval2, intval3, intval4
+    const pitchClasses: Set<PitchClass> = new Set(midiNums.map(_midiToPitchClass))
+    const possibleChords: ChordName[] = []
 
-    switch (midiNums.length) {
-      case 3: {
-        // triad
-        if (midiNums[0] && midiNums[1] && midiNums[2]) {
-          intval1 = midiNums[1] - midiNums[0]
-          intval2 = midiNums[2] - midiNums[1]
+    for (const root of Array.from(pitchClasses)) {
+      const intervals = Array.from(pitchClasses)
+        .map((pc) => (pc - root + 12) % 12)
+        .sort((a, b) => a - b)
 
-          if (_arraysAreEqual([intval1, intval2], INTERVALS['5'])) {
-            chordName = `${_midi2Name(midiNums[0])}5`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['3add9'])) {
-            chordName = `${_midi2Name(midiNums[0])}add9`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['major'])) {
-            chordName = `${_midi2Name(midiNums[0])}maj`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['aug'])) {
-            chordName = `${_midi2Name(midiNums[0])}aug`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['minor'])) {
-            chordName = `${_midi2Name(midiNums[0])}min`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['dim'])) {
-            chordName = `${_midi2Name(midiNums[0])}dim`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus2'])) {
-            chordName = `${_midi2Name(midiNums[0])}sus2`
-          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus4'])) {
-            chordName = `${_midi2Name(midiNums[0])}sus4`
-          } else {
-            chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-          }
-        }
+      emit('currentInvls', intervals)
 
-        break
-      }
-      case 4: {
-        if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3]) {
-          intval1 = midiNums[1] - midiNums[0]
-          intval2 = midiNums[2] - midiNums[1]
-          intval3 = midiNums[3] - midiNums[2]
+      const key = intervals.join(',')
+      const type = CHORD_PATTERNS[key]
 
-          if (midiNums[3] - midiNums[0] == 12) {
-            // we have an octave, so return triad instead
-            return getChord(midiNums.slice(0, midiNums.length - 1))
-          }
-
-          if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['4add9'])) {
-            chordName = `${_midi2Name(midiNums[0])}add9`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6'])) {
-            chordName = `${_midi2Name(midiNums[0])}6`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6sus2'])) {
-            chordName = `${_midi2Name(midiNums[0])}6sus2`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['dom7'])) {
-            chordName = `${_midi2Name(midiNums[0])}7`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['min7'])) {
-            chordName = `${_midi2Name(midiNums[0])}min7`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj7'])) {
-            chordName = `${_midi2Name(midiNums[0])}maj7`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj9'])) {
-            chordName = `${_midi2Name(midiNums[0])}maj9`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['7sus4'])) {
-            chordName = `${_midi2Name(midiNums[0])}7sus4`
-          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['9sus4'])) {
-            chordName = `${_midi2Name(midiNums[0])}9sus4`
-          } else {
-            chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-          }
-        }
-
-        break
-      }
-      case 5: {
-        if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3] && midiNums[4]) {
-          intval1 = midiNums[1] - midiNums[0]
-          intval2 = midiNums[2] - midiNums[1]
-          intval3 = midiNums[3] - midiNums[2]
-          intval4 = midiNums[4] - midiNums[3]
-
-          if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(b9)'])) {
-            chordName = `${_midi2Name(midiNums[0])}maj7(b9)`
-          } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(9)'])) {
-            chordName = `${_midi2Name(midiNums[0])}maj7(9)`
-          } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(s9)'])) {
-            chordName = `${_midi2Name(midiNums[0])}maj7(#9)`
-          } else {
-            chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-          }
-        }
-
-        break
-      }
-      default: {
-        if (midiNums[0]) {
-          chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-        }
-
-        break
+      if (type) {
+        const name = _pitchClassName(root, useFlatNotation)
+        possibleChords.push(`${name}${type}`)
       }
     }
 
-    return chordName
+    return possibleChords
   } else {
-    const letters: string[] = []
-
-    midiNums.forEach((midi: number) => {
-      letters.push(_midi2Name(midi))
-    })
-
-    return letters.join(',')
+    return ['(Need at least 3 notes)']
   }
 }
+
+// old getChord
+// function getChord(midiNums: MidiArray = []): ChordName {
+//   if (!midiNums || !midiNums.length) return ''
+
+//   if (midiNums.length > 2) {
+//     let chordName: ChordName = ''
+//     let intval1, intval2, intval3, intval4
+
+//     switch (midiNums.length) {
+//       case 3: {
+//         // triad
+//         if (midiNums[0] && midiNums[1] && midiNums[2]) {
+//           intval1 = midiNums[1] - midiNums[0]
+//           intval2 = midiNums[2] - midiNums[1]
+
+//           console.log('2 intvals', intval1, intval2)
+
+//           if (_arraysAreEqual([intval1, intval2], INTERVALS['5'])) {
+//             chordName = `${_midi2Name(midiNums[0])}5`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['3add9'])) {
+//             chordName = `${_midi2Name(midiNums[0])}add9`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['major'])) {
+//             chordName = `${_midi2Name(midiNums[0])}maj`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['aug'])) {
+//             chordName = `${_midi2Name(midiNums[0])}aug`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['minor'])) {
+//             chordName = `${_midi2Name(midiNums[0])}min`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['dim'])) {
+//             chordName = `${_midi2Name(midiNums[0])}dim`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus2'])) {
+//             chordName = `${_midi2Name(midiNums[0])}sus2`
+//           } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus4'])) {
+//             chordName = `${_midi2Name(midiNums[0])}sus4`
+//           } else {
+//             chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+//           }
+//         }
+
+//         break
+//       }
+//       case 4: {
+//         if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3]) {
+//           intval1 = midiNums[1] - midiNums[0]
+//           intval2 = midiNums[2] - midiNums[1]
+//           intval3 = midiNums[3] - midiNums[2]
+
+//           console.log('3 intvals', intval1, intval2, intval3)
+
+//           if (midiNums[3] - midiNums[0] == 12) {
+//             // we have an octave, so return triad instead
+//             return getChord(midiNums.slice(0, midiNums.length - 1))
+//           }
+
+//           if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['4add9'])) {
+//             chordName = `${_midi2Name(midiNums[0])}add9`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6'])) {
+//             chordName = `${_midi2Name(midiNums[0])}6`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6sus2'])) {
+//             chordName = `${_midi2Name(midiNums[0])}6sus2`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['dom7'])) {
+//             chordName = `${_midi2Name(midiNums[0])}7`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['min7'])) {
+//             chordName = `${_midi2Name(midiNums[0])}min7`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj7'])) {
+//             chordName = `${_midi2Name(midiNums[0])}maj7`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj9'])) {
+//             chordName = `${_midi2Name(midiNums[0])}maj9`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['7sus4'])) {
+//             chordName = `${_midi2Name(midiNums[0])}7sus4`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['9sus4'])) {
+//             chordName = `${_midi2Name(midiNums[0])}9sus4`
+//           } else {
+//             chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+//           }
+//         }
+
+//         break
+//       }
+//       case 5: {
+//         if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3] && midiNums[4]) {
+//           intval1 = midiNums[1] - midiNums[0]
+//           intval2 = midiNums[2] - midiNums[1]
+//           intval3 = midiNums[3] - midiNums[2]
+//           intval4 = midiNums[4] - midiNums[3]
+
+//           console.log('4 intvals', intval1, intval2, intval3, intval4)
+
+//           if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(b9)'])) {
+//             chordName = `${_midi2Name(midiNums[0])}maj7(b9)`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(9)'])) {
+//             chordName = `${_midi2Name(midiNums[0])}maj7(9)`
+//           } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(s9)'])) {
+//             chordName = `${_midi2Name(midiNums[0])}maj7(#9)`
+//           } else {
+//             chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+//           }
+//         }
+
+//         break
+//       }
+//       // case 6: {
+//       //   if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3] && midiNums[4] && midiNums[5]) {
+//       //     intval1 = midiNums[1] - midiNums[0]
+//       //     intval2 = midiNums[2] - midiNums[1]
+//       //     intval3 = midiNums[3] - midiNums[2]
+//       //     intval4 = midiNums[4] - midiNums[3]
+//       //     intval5 = midiNums[5] - midiNums[4]
+
+//       //     if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(b9)'])) {
+//       //       chordName = `${_midi2Name(midiNums[0])}maj7(b9)`
+//       //     } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(9)'])) {
+//       //       chordName = `${_midi2Name(midiNums[0])}maj7(9)`
+//       //     } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(s9)'])) {
+//       //       chordName = `${_midi2Name(midiNums[0])}maj7(#9)`
+//       //     } else {
+//       //       chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+//       //     }
+//       //   }
+
+//       //   break
+//       // }
+//       default: {
+//         if (midiNums[0]) {
+//           chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+//         }
+
+//         break
+//       }
+//     }
+
+//     return chordName
+//   } else {
+//     const letters: string[] = []
+
+//     midiNums.forEach((midi: number) => {
+//       letters.push(_midi2Name(midi))
+//     })
+
+//     return letters.join(',')
+//   }
+// }
 
 function getNotes(): NoteArray {
   const pressedNotes: HTMLElement[] = Array.from(

@@ -3,6 +3,8 @@ import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
 
 type FretArray = string[]
+type PitchClass = number
+type IntervalsArray = number[][]
 type MidiArray = number[]
 type NoteArray = string[]
 type ChordName = string
@@ -10,6 +12,7 @@ type ChordName = string
 const frets = ref<FretArray>([])
 const midis = ref<MidiArray>([])
 const notes = ref<NoteArray>([])
+const invls = ref<IntervalsArray>([])
 const chord = ref<ChordName>('')
 
 function currentFrets(newFrets: FretArray): void {
@@ -21,8 +24,11 @@ function currentMidis(newMidis: MidiArray): void {
 function currentNotes(newNotes: NoteArray): void {
   notes.value = newNotes
 }
-function currentChord(newChord: ChordName): void {
-  chord.value = newChord
+function currentInvls(newInvls: IntervalsArray): void {
+  invls.value = newInvls
+}
+function currentChord(newChord: ChordName[]): void {
+  chord.value = newChord.join(', ')
 }
 </script>
 
@@ -36,6 +42,7 @@ function currentChord(newChord: ChordName): void {
       @current-frets="currentFrets"
       @current-midis="currentMidis"
       @current-notes="currentNotes"
+      @current-invls="currentInvls"
       @current-chord="currentChord"
     />
 
@@ -47,6 +54,9 @@ function currentChord(newChord: ChordName): void {
     </div>
     <div id="current-notes" :class="{ empty: !notes.length }">
       Notes: {{ notes.length ? notes : '' }}
+    </div>
+    <div id="current-invls" :class="{ empty: !invls.length }">
+      Intervals: {{ invls.length ? invls : '' }}
     </div>
     <div id="current-chord" :class="{ empty: !chord.length }">Chord: {{ chord ? chord : '' }}</div>
   </main>
