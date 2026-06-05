@@ -2,12 +2,22 @@
 import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
 
-type NoteArray = string[]
+const frets = ref<string[]>([])
+const midis = ref<number[]>([])
+const notes = ref<string[]>([])
+const chord = ref<String>('')
 
-const notes = ref<NoteArray>([])
-
-function currentNotes(newNotes: NoteArray): void {
+function currentFrets(newFrets: string[]): void {
+  frets.value = newFrets
+}
+function currentMidis(newMidis: number[]): void {
+  midis.value = newMidis
+}
+function currentNotes(newNotes: string[]): void {
   notes.value = newNotes
+}
+function currentChord(newChord: string): void {
+  chord.value = newChord
 }
 </script>
 
@@ -17,10 +27,23 @@ function currentNotes(newNotes: NoteArray): void {
   </header>
 
   <main>
-    <Fretboard @current-notes="currentNotes" />
-    <span id="current-notes" :class="{ empty: !notes.length }">
-      Current Notes: {{ notes.length ? notes : '' }}
-    </span>
+    <Fretboard
+      @current-frets="currentFrets"
+      @current-midis="currentMidis"
+      @current-notes="currentNotes"
+      @current-chord="currentChord"
+    />
+
+    <div id="current-frets" :class="{ empty: !frets.length }">
+      Frets: {{ frets.length ? frets : '' }}
+    </div>
+    <div id="current-midis" :class="{ empty: !midis.length }">
+      Midis: {{ midis.length ? midis : '' }}
+    </div>
+    <div id="current-notes" :class="{ empty: !notes.length }">
+      Notes: {{ notes.length ? notes : '' }}
+    </div>
+    <div id="current-chord" :class="{ empty: !chord.length }">Chord: {{ chord ? chord : '' }}</div>
   </main>
 </template>
 
