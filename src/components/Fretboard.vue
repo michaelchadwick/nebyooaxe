@@ -178,7 +178,7 @@ const INTERVALS = {
   '9sus4': [2, 3, 5],
 }
 
-const frets = ref<string[]>([])
+const fretsPressed = ref<string[]>([])
 
 const emit = defineEmits(['currentFrets', 'currentMidis', 'currentNotes', 'currentChord'])
 
@@ -216,34 +216,33 @@ function toggleFret(event: PointerEvent): void {
     const dataset = elem?.dataset
 
     if (dataset?.pressed == 'false') {
-      // TODO:
-      // override any other pressed frets on same string
-      // const stringFretsPressed: NodeList = document.querySelectorAll(
-      //   `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
-      // )
+      const stringFretsPressed: NodeList = document.querySelectorAll(
+        `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
+      )
 
-      // console.log('stringFretsPressed', stringFretsPressed)
-
-      // if (stringFretsPressed && stringFretsPressed.length) {
-      //   stringFretsPressed.forEach((string: Node) => {
-      //     string.querySelectorAll('.fret').forEach((fret: HTMLElement))
-      //     if (string instanceof HTMLElement) {
-      //       string.dataset.pressed = 'false'
-      //     }
-      //   })
-      // }
+      if (stringFretsPressed && stringFretsPressed.length) {
+        stringFretsPressed.forEach((fret: Node) => {
+          if (fret instanceof HTMLElement) {
+            fret.dataset.pressed = 'false'
+            fret.classList.remove('pressed')
+            fretsPressed.value = fretsPressed.value.filter(
+              (fretPressed) => fretPressed != fret.dataset.fretId,
+            )
+          }
+        })
+      }
       dataset.pressed = 'true'
       classes?.add('pressed')
-      frets.value = [...frets.value, fretId ?? '']
+      fretsPressed.value = [...fretsPressed.value, fretId ?? '']
     } else {
       if (dataset !== undefined) {
         dataset.pressed = 'false'
       }
       classes?.remove('pressed')
-      frets.value = frets.value.filter((fret) => fret != fretId)
+      fretsPressed.value = fretsPressed.value.filter((fret) => fret != fretId)
     }
 
-    const sortedFrets: FretArray = frets.value ? [...frets.value].sort() : []
+    const sortedFrets: FretArray = fretsPressed.value ? [...fretsPressed.value].sort() : []
     emit('currentFrets', sortedFrets)
 
     const noteArray: NoteArray = getNotes()
