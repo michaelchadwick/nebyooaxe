@@ -47,18 +47,20 @@ function currentChord(newChord: ChordName[]): void {
     />
 
     <div id="current-frets" :class="{ empty: !frets.length }">
-      Frets: {{ frets.length ? frets : '' }}
+      <strong>Frets</strong>: {{ frets.length ? frets : '' }}
     </div>
     <div id="current-midis" :class="{ empty: !midis.length }">
-      Midis: {{ midis.length ? midis : '' }}
+      <strong>Midis</strong>: {{ midis.length ? midis : '' }}
     </div>
     <div id="current-notes" :class="{ empty: !notes.length }">
-      Notes: {{ notes.length ? notes : '' }}
+      <strong>Notes</strong>: {{ notes.length ? notes : '' }}
     </div>
     <div id="current-invls" :class="{ empty: !invls.length }">
-      Intervals: {{ invls.length ? invls : '' }}
+      <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
     </div>
-    <div id="current-chord" :class="{ empty: !chord.length }">Chord: {{ chord ? chord : '' }}</div>
+    <div id="current-chord" :class="{ empty: !chord.length }">
+      <strong>Chord</strong>: {{ chord ? chord : '' }}
+    </div>
   </main>
 </template>
 
