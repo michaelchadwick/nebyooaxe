@@ -167,28 +167,6 @@ const MUSICAL_NOTES: Note[] = [
   new Note('Bb8', 7458.62, 118),
   new Note('B8', 7902.13, 119),
 ]
-const INTERVALS = {
-  5: [7, 5],
-  '3add9': [2, 2],
-  '4add9': [2, 2, 3],
-  major: [4, 3],
-  aug: [4, 4],
-  minor: [3, 4],
-  dim: [3, 3],
-  sus2: [2, 5],
-  sus4: [5, 2],
-  6: [4, 3, 2],
-  '6sus2': [2, 5, 2],
-  dom7: [4, 3, 3],
-  min7: [3, 4, 3],
-  maj7: [4, 3, 4],
-  maj9: [4, 7, 3],
-  'maj7(b9)': [4, 3, 4, 2],
-  'maj7(9)': [4, 3, 4, 3],
-  'maj7(s9)': [4, 3, 4, 4],
-  '7sus4': [5, 2, 3],
-  '9sus4': [2, 3, 5],
-}
 
 const _arraysAreEqual = (arr1: number[], arr2: number[]): boolean => {
   return arr1.join() == arr2.join()
@@ -280,6 +258,30 @@ function toggleFret(event: PointerEvent): void {
   }
 }
 
+// TODO
+// translate more INTERVALS -> CHORD_PATTERNS
+// const INTERVALS = {
+//   5: [7, 5],
+//   '3add9': [2, 2],
+//   '4add9': [2, 2, 3],
+//   major: [4, 3],
+//   aug: [4, 4],
+//   minor: [3, 4],
+//   dim: [3, 3],
+//   sus2: [2, 5],
+//   sus4: [5, 2],
+//   6: [4, 3, 2],
+//   '6sus2': [2, 5, 2],
+//   dom7: [4, 3, 3],
+//   min7: [3, 4, 3],
+//   maj7: [4, 3, 4],
+//   maj9: [4, 7, 3],
+//   'maj7(b9)': [4, 3, 4, 2],
+//   'maj7(9)': [4, 3, 4, 3],
+//   'maj7(s9)': [4, 3, 4, 4],
+//   '7sus4': [5, 2, 3],
+//   '9sus4': [2, 3, 5],
+// }
 const CHORD_PATTERNS: Record<string, string> = {
   // Triads
   '0,7': '5',
