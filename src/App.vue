@@ -2,21 +2,26 @@
 import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
 
-const frets = ref<string[]>([])
-const midis = ref<number[]>([])
-const notes = ref<string[]>([])
-const chord = ref<String>('')
+type FretArray = string[]
+type MidiArray = number[]
+type NoteArray = string[]
+type ChordName = string
 
-function currentFrets(newFrets: string[]): void {
+const frets = ref<FretArray>([])
+const midis = ref<MidiArray>([])
+const notes = ref<NoteArray>([])
+const chord = ref<ChordName>('')
+
+function currentFrets(newFrets: FretArray): void {
   frets.value = newFrets
 }
-function currentMidis(newMidis: number[]): void {
+function currentMidis(newMidis: MidiArray): void {
   midis.value = newMidis
 }
-function currentNotes(newNotes: string[]): void {
+function currentNotes(newNotes: NoteArray): void {
   notes.value = newNotes
 }
-function currentChord(newChord: string): void {
+function currentChord(newChord: ChordName): void {
   chord.value = newChord
 }
 </script>

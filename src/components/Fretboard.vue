@@ -1,129 +1,159 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-const MUSICAL_NOTES = [
+class Note {
+  name: string
+  frequency: number
+  midi: number
+  fretIds: string[]
+
+  constructor(name: string, frequency: number, midi: number, fretIds: string[] = []) {
+    this.name = name
+    this.frequency = frequency
+    this.midi = midi
+    this.fretIds = fretIds
+  }
+}
+type FretArray = string[]
+type MidiArray = number[]
+type NoteArray = Note[]
+type ChordName = string
+
+/*
+Switch from arbitrary object to Note
+\{
+
+  name: '([A-Za-z0-9]{2,3})',
+  frequency: ([0-9]{2,4}\.[0-9]{1,2}),
+  midi: ([0-9]{2,3})
+  (, fretIds:
+    \[{1}
+      ('[0-9]+_[0-9]+'){1}
+      (, '[0-9]+_[0-9]+')*
+    \]{1}
+  )?
+
+\},
+*/
+
+const MUSICAL_NOTES: Note[] = [
   // index 0
-  { name: 'C0', frequency: 16.35, midi: 12 },
-  { name: 'Db0', frequency: 17.32, midi: 13 },
-  { name: 'D0', frequency: 18.35, midi: 14 },
-  { name: 'Eb0', frequency: 19.45, midi: 15 },
-  { name: 'E0', frequency: 20.6, midi: 16 },
-  { name: 'F0', frequency: 21.83, midi: 17 },
-  { name: 'Gb0', frequency: 23.12, midi: 18 },
-  { name: 'G0', frequency: 24.5, midi: 19 },
-  { name: 'Ab0', frequency: 25.96, midi: 20 },
-  { name: 'A0', frequency: 27.5, midi: 21 },
-  { name: 'Bb0', frequency: 29.14, midi: 22 },
-  { name: 'B0', frequency: 30.87, midi: 23 },
+  new Note('C0', 16.35, 12),
+  new Note('Db0', 17.32, 13),
+  new Note('D0', 18.35, 14),
+  new Note('Eb0', 19.45, 15),
+  new Note('E0', 20.6, 16),
+  new Note('F0', 21.83, 17),
+  new Note('Gb0', 23.12, 18),
+  new Note('G0', 24.5, 19),
+  new Note('Ab0', 25.96, 20),
+  new Note('A0', 27.5, 21),
+  new Note('Bb0', 29.14, 22),
+  new Note('B0', 30.87, 23),
   // index 12
-  { name: 'C1', frequency: 32.7, midi: 24 },
-  { name: 'Db1', frequency: 34.65, midi: 25 },
-  { name: 'D1', frequency: 36.71, midi: 26 },
-  { name: 'Eb1', frequency: 38.89, midi: 27 },
-  { name: 'E1', frequency: 41.2, midi: 28 },
-  { name: 'F1', frequency: 43.65, midi: 29 },
-  { name: 'Gb1', frequency: 46.25, midi: 30 },
-  { name: 'G1', frequency: 49.0, midi: 31 },
-  { name: 'Ab1', frequency: 51.91, midi: 32 },
-  { name: 'A1', frequency: 55.0, midi: 33 },
-  { name: 'Bb1', frequency: 58.27, midi: 34 },
-  { name: 'B1', frequency: 61.74, midi: 35 },
+  new Note('C1', 32.7, 24),
+  new Note('Db1', 34.65, 25),
+  new Note('D1', 36.71, 26),
+  new Note('Eb1', 38.89, 27),
+  new Note('E1', 41.2, 28),
+  new Note('F1', 43.65, 29),
+  new Note('Gb1', 46.25, 30),
+  new Note('G1', 49.0, 31),
+  new Note('Ab1', 51.91, 32),
+  new Note('A1', 55.0, 33),
+  new Note('Bb1', 58.27, 34),
+  new Note('B1', 61.74, 35),
   // index 24
-  { name: 'C2', frequency: 65.41, midi: 36 },
-  { name: 'Db2', frequency: 69.3, midi: 37 },
-  { name: 'D2', frequency: 73.42, midi: 38 },
-  { name: 'Eb2', frequency: 77.78, midi: 39 },
-  { name: 'E2', frequency: 82.41, midi: 40, fretIds: ['1_0'] },
-  { name: 'F2', frequency: 87.31, midi: 41, fretIds: ['1_1'] },
-  { name: 'Gb2', frequency: 92.5, midi: 42, fretIds: ['1_2'] },
-  { name: 'G2', frequency: 98.0, midi: 43, fretIds: ['1_3'] },
-  { name: 'Ab2', frequency: 103.83, midi: 44, fretIds: ['1_4'] },
-  { name: 'A2', frequency: 110.0, midi: 45, fretIds: ['1_5', '2_0'] },
-  { name: 'Bb2', frequency: 116.54, midi: 46, fretIds: ['1_6', '2_1'] },
-  { name: 'B2', frequency: 123.47, midi: 47, fretIds: ['1_7', '2_2'] },
+  new Note('C2', 65.41, 36),
+  new Note('Db2', 69.3, 37),
+  new Note('D2', 73.42, 38),
+  new Note('Eb2', 77.78, 39),
+  new Note('E2', 82.41, 40, ['1_0']),
+  new Note('F2', 87.31, 41, ['1_1']),
+  new Note('Gb2', 92.5, 42, ['1_2']),
+  new Note('G2', 98.0, 43, ['1_3']),
+  new Note('Ab2', 103.83, 44, ['1_4']),
+  new Note('A2', 110.0, 45, ['1_5', '2_0']),
+  new Note('Bb2', 116.54, 46, ['1_6', '2_1']),
+  new Note('B2', 123.47, 47, ['1_7', '2_2']),
   // index 36
-  { name: 'C3', frequency: 130.81, midi: 48, fretIds: ['1_8', '2_3'] },
-  { name: 'Db3', frequency: 138.59, midi: 49, fretIds: ['1_9', '2_4'] },
-  { name: 'D3', frequency: 146.83, midi: 50, fretIds: ['1_10', '2_5', '3_0'] },
-  { name: 'Eb3', frequency: 155.56, midi: 51, fretIds: ['1_11', '2_6', '3_1'] },
-  { name: 'E3', frequency: 164.81, midi: 52, fretIds: ['1_12', '2_7', '3_2'] },
-  { name: 'F3', frequency: 174.61, midi: 53, fretIds: ['1_13', '2_8', '3_3'] },
-  { name: 'Gb3', frequency: 185.0, midi: 54, fretIds: ['1_14', '2_9', '3_4'] },
-  { name: 'G3', frequency: 196.0, midi: 55, fretIds: ['1_15', '2_10', '3_5', '4_0'] },
-  { name: 'Ab3', frequency: 207.65, midi: 56, fretIds: ['1_16', '2_11', '3_6', '4_1'] },
-  { name: 'A3', frequency: 220.0, midi: 57, fretIds: ['1_17', '2_12', '3_7', '4_2'] },
-  { name: 'Bb3', frequency: 233.08, midi: 58, fretIds: ['1_18', '2_13', '3_8', '4_3'] },
-  { name: 'B3', frequency: 246.94, midi: 59, fretIds: ['1_19', '2_14', '3_9', '4_4', '5_0'] },
+  new Note('C3', 130.81, 48, ['1_8', '2_3']),
+  new Note('Db3', 138.59, 49, ['1_9', '2_4']),
+  new Note('D3', 146.83, 50, ['1_10', '2_5', '3_0']),
+  new Note('Eb3', 155.56, 51, ['1_11', '2_6', '3_1']),
+  new Note('E3', 164.81, 52, ['1_12', '2_7', '3_2']),
+  new Note('F3', 174.61, 53, ['1_13', '2_8', '3_3']),
+  new Note('Gb3', 185.0, 54, ['1_14', '2_9', '3_4']),
+  new Note('G3', 196.0, 55, ['1_15', '2_10', '3_5', '4_0']),
+  new Note('Ab3', 207.65, 56, ['1_16', '2_11', '3_6', '4_1']),
+  new Note('A3', 220.0, 57, ['1_17', '2_12', '3_7', '4_2']),
+  new Note('Bb3', 233.08, 58, ['1_18', '2_13', '3_8', '4_3']),
+  new Note('B3', 246.94, 59, ['1_19', '2_14', '3_9', '4_4', '5_0']),
   // index 48
-  { name: 'C4', frequency: 261.63, midi: 60, fretIds: ['1_20', '2_15', '3_10', '4_5', '5_1'] },
-  { name: 'Db4', frequency: 277.18, midi: 61, fretIds: ['1_21', '2_16', '3_11', '4_6', '5_2'] },
-  { name: 'D4', frequency: 293.66, midi: 62, fretIds: ['1_22', '2_17', '3_12', '4_7', '5_3'] },
-  { name: 'Eb4', frequency: 311.13, midi: 63, fretIds: ['1_23', '2_18', '3_13', '4_8', '5_4'] },
-  {
-    name: 'E4',
-    frequency: 329.63,
-    midi: 64,
-    fretIds: ['1_24', '2_19', '3_14', '4_9', '5_5', '6_0'],
-  },
-  { name: 'F4', frequency: 349.23, midi: 65, fretIds: ['2_20', '3_15', '4_10', '5_6', '6_1'] },
-  { name: 'Gb4', frequency: 369.99, midi: 66, fretIds: ['2_21', '3_16', '4_11', '5_7', '6_2'] },
-  { name: 'G4', frequency: 392.0, midi: 67, fretIds: ['2_22', '3_17', '4_12', '5_8', '6_3'] },
-  { name: 'Ab4', frequency: 415.3, midi: 68, fretIds: ['2_23', '3_18', '4_13', '5_9', '6_4'] },
-  { name: 'A4', frequency: 440.0, midi: 69, fretIds: ['2_24', '3_19', '4_14', '5_10', '6_5'] },
-  { name: 'Bb4', frequency: 466.16, midi: 70, fretIds: ['3_20', '4_15', '5_11', '6_6'] },
-  { name: 'B4', frequency: 493.88, midi: 71, fretIds: ['3_21', '4_16', '5_12', '6_7'] },
+  new Note('C4', 261.63, 60, ['1_20', '2_15', '3_10', '4_5', '5_1']),
+  new Note('Db4', 277.18, 61, ['1_21', '2_16', '3_11', '4_6', '5_2']),
+  new Note('D4', 293.66, 62, ['1_22', '2_17', '3_12', '4_7', '5_3']),
+  new Note('Eb4', 311.13, 63, ['1_23', '2_18', '3_13', '4_8', '5_4']),
+  new Note('E4', 329.63, 64, ['1_24', '2_19', '3_14', '4_9', '5_5', '6_0']),
+  new Note('F4', 349.23, 65, ['2_20', '3_15', '4_10', '5_6', '6_1']),
+  new Note('Gb4', 369.99, 66, ['2_21', '3_16', '4_11', '5_7', '6_2']),
+  new Note('G4', 392.0, 67, ['2_22', '3_17', '4_12', '5_8', '6_3']),
+  new Note('Ab4', 415.3, 68, ['2_23', '3_18', '4_13', '5_9', '6_4']),
+  new Note('A4', 440.0, 69, ['2_24', '3_19', '4_14', '5_10', '6_5']),
+  new Note('Bb4', 466.16, 70, ['3_20', '4_15', '5_11', '6_6']),
+  new Note('B4', 493.88, 71, ['3_21', '4_16', '5_12', '6_7']),
   // index 60
-  { name: 'C5', frequency: 523.25, midi: 72, fretIds: ['3_22', '4_17', '5_13', '6_8'] },
-  { name: 'Db5', frequency: 554.37, midi: 73, fretIds: ['3_23', '4_18', '5_14', '6_9'] },
-  { name: 'D5', frequency: 587.33, midi: 74, fretIds: ['3_24', '4_19', '5_15', '6_10'] },
-  { name: 'Eb5', frequency: 622.25, midi: 75, fretIds: ['4_20', '5_16', '6_11'] },
-  { name: 'E5', frequency: 659.25, midi: 76, fretIds: ['4_21', '5_17', '6_12'] },
-  { name: 'F5', frequency: 698.46, midi: 77, fretIds: ['4_22', '5_18', '6_13'] },
-  { name: 'Gb5', frequency: 739.99, midi: 78, fretIds: ['4_23', '5_19', '6_14'] },
-  { name: 'G5', frequency: 783.99, midi: 79, fretIds: ['4_24', '5_20', '6_15'] },
-  { name: 'Ab5', frequency: 830.61, midi: 80, fretIds: ['5_21', '6_16'] },
-  { name: 'A5', frequency: 880.0, midi: 81, fretIds: ['5_22', '6_17'] },
-  { name: 'Bb5', frequency: 932.33, midi: 82, fretIds: ['5_23', '6_18'] },
-  { name: 'B5', frequency: 987.77, midi: 83, fretIds: ['5_24', '6_19'] },
+  new Note('C5', 523.25, 72, ['3_22', '4_17', '5_13', '6_8']),
+  new Note('Db5', 554.37, 73, ['3_23', '4_18', '5_14', '6_9']),
+  new Note('D5', 587.33, 74, ['3_24', '4_19', '5_15', '6_10']),
+  new Note('Eb5', 622.25, 75, ['4_20', '5_16', '6_11']),
+  new Note('E5', 659.25, 76, ['4_21', '5_17', '6_12']),
+  new Note('F5', 698.46, 77, ['4_22', '5_18', '6_13']),
+  new Note('Gb5', 739.99, 78, ['4_23', '5_19', '6_14']),
+  new Note('G5', 783.99, 79, ['4_24', '5_20', '6_15']),
+  new Note('Ab5', 830.61, 80, ['5_21', '6_16']),
+  new Note('A5', 880.0, 81, ['5_22', '6_17']),
+  new Note('Bb5', 932.33, 82, ['5_23', '6_18']),
+  new Note('B5', 987.77, 83, ['5_24', '6_19']),
   // index 72
-  { name: 'C6', frequency: 1046.5, midi: 84, fretIds: ['6_20'] },
-  { name: 'Db6', frequency: 1108.73, midi: 85, fretIds: ['6_21'] },
-  { name: 'D6', frequency: 1174.66, midi: 86, fretIds: ['6_22'] },
-  { name: 'Eb6', frequency: 1244.51, midi: 87, fretIds: ['6_23'] },
-  { name: 'E6', frequency: 1318.51, midi: 88, fretIds: ['6_24'] },
-  { name: 'F6', frequency: 1396.91, midi: 89 },
-  { name: 'Gb6', frequency: 1479.98, midi: 90 },
-  { name: 'G6', frequency: 1567.98, midi: 91 },
-  { name: 'Ab6', frequency: 1661.22, midi: 92 },
-  { name: 'A6', frequency: 1760.0, midi: 93 },
-  { name: 'Bb6', frequency: 1864.66, midi: 94 },
-  { name: 'B6', frequency: 1975.53, midi: 95 },
+  new Note('C6', 1046.5, 84, ['6_20']),
+  new Note('Db6', 1108.73, 85, ['6_21']),
+  new Note('D6', 1174.66, 86, ['6_22']),
+  new Note('Eb6', 1244.51, 87, ['6_23']),
+  new Note('E6', 1318.51, 88, ['6_24']),
+  new Note('F6', 1396.91, 89),
+  new Note('Gb6', 1479.98, 90),
+  new Note('G6', 1567.98, 91),
+  new Note('Ab6', 1661.22, 92),
+  new Note('A6', 1760.0, 93),
+  new Note('Bb6', 1864.66, 94),
+  new Note('B6', 1975.53, 95),
   // index 84
-  { name: 'C7', frequency: 2093.0, midi: 96 },
-  { name: 'Db7', frequency: 2217.46, midi: 97 },
-  { name: 'D7', frequency: 2349.32, midi: 98 },
-  { name: 'Eb7', frequency: 2489.02, midi: 99 },
-  { name: 'E7', frequency: 2637.02, midi: 100 },
-  { name: 'F7', frequency: 2793.83, midi: 101 },
-  { name: 'Gb7', frequency: 2959.96, midi: 102 },
-  { name: 'G7', frequency: 3135.96, midi: 103 },
-  { name: 'Ab7', frequency: 3322.44, midi: 104 },
-  { name: 'A7', frequency: 3520.0, midi: 105 },
-  { name: 'Bb7', frequency: 3729.31, midi: 106 },
-  { name: 'B7', frequency: 3951.07, midi: 107 },
+  new Note('C7', 2093.0, 96),
+  new Note('Db7', 2217.46, 97),
+  new Note('D7', 2349.32, 98),
+  new Note('Eb7', 2489.02, 99),
+  new Note('E7', 2637.02, 100),
+  new Note('F7', 2793.83, 101),
+  new Note('Gb7', 2959.96, 102),
+  new Note('G7', 3135.96, 103),
+  new Note('Ab7', 3322.44, 104),
+  new Note('A7', 3520.0, 105),
+  new Note('Bb7', 3729.31, 106),
+  new Note('B7', 3951.07, 107),
   // index 96
-  { name: 'C8', frequency: 4186.01, midi: 108 },
-  { name: 'Db8', frequency: 4434.92, midi: 109 },
-  { name: 'D8', frequency: 4698.63, midi: 110 },
-  { name: 'Eb8', frequency: 4978.03, midi: 111 },
-  { name: 'E8', frequency: 5274.04, midi: 112 },
-  { name: 'F8', frequency: 5587.65, midi: 113 },
-  { name: 'Gb8', frequency: 5919.91, midi: 114 },
-  { name: 'G8', frequency: 6271.93, midi: 115 },
-  { name: 'Ab8', frequency: 6644.88, midi: 116 },
-  { name: 'A8', frequency: 7040.0, midi: 117 },
-  { name: 'Bb8', frequency: 7458.62, midi: 118 },
-  { name: 'B8', frequency: 7902.13, midi: 119 },
+  new Note('C8', 4186.01, 108),
+  new Note('Db8', 4434.92, 109),
+  new Note('D8', 4698.63, 110),
+  new Note('Eb8', 4978.03, 111),
+  new Note('E8', 5274.04, 112),
+  new Note('F8', 5587.65, 113),
+  new Note('Gb8', 5919.91, 114),
+  new Note('G8', 6271.93, 115),
+  new Note('Ab8', 6644.88, 116),
+  new Note('A8', 7040.0, 117),
+  new Note('Bb8', 7458.62, 118),
+  new Note('B8', 7902.13, 119),
 ]
 const INTERVALS = {
   5: [7, 5],
@@ -150,25 +180,24 @@ const INTERVALS = {
 
 const frets = ref<string[]>([])
 
-const emit = defineEmits<{
-  'current-frets': (frets: string[]) => void
-  'current-midis': (midis: number[]) => void
-  'current-notes': (notes: string[]) => void
-  'current-chord': (chord: string) => void
-}>()
+const emit = defineEmits(['currentFrets', 'currentMidis', 'currentNotes', 'currentChord'])
 
-const _arraysAreEqual = (arr1: number[], arr2: number[]) => {
+const _arraysAreEqual = (arr1: number[], arr2: number[]): boolean => {
+  console.log('equal arrs?', arr1.join(), arr2.join(), arr1.join() == arr2.join())
   return arr1.join() == arr2.join()
 }
-const _midi2Name = (midiNumber: number) => {
+const _midi2Name = (midiNumber: number): string => {
   const note = MUSICAL_NOTES.filter((mNote) => mNote.midi == midiNumber)
 
   if (note.length) {
-    const name = note[0]?.name
-
-    return name[1] == 'b' ? `${name[0]}${name[1]}` : `${name[0]}`
+    if (note[0]) {
+      const name = note[0].name
+      return name[1] == 'b' ? `${name[0]}${name[1]}` : `${name[0]}`
+    } else {
+      return ''
+    }
   } else {
-    return null
+    return ''
   }
 }
 
@@ -189,7 +218,7 @@ function toggleFret(event: PointerEvent): void {
     if (dataset?.pressed == 'false') {
       dataset.pressed = 'true'
       classes?.add('pressed')
-      frets.value = [...frets.value, fretId]
+      frets.value = [...frets.value, fretId ?? '']
     } else {
       if (dataset !== undefined) {
         dataset.pressed = 'false'
@@ -198,112 +227,129 @@ function toggleFret(event: PointerEvent): void {
       frets.value = frets.value.filter((fret) => fret != fretId)
     }
 
-    // console.log('toggleFret', fretId, dataset, classes)
+    const sortedFrets: FretArray = frets.value ? [...frets.value].sort() : []
+    emit('currentFrets', sortedFrets)
 
-    const noteArray = getNotes()
+    const noteArray: NoteArray = getNotes()
 
-    emit('current-frets', frets.value.sort())
-    emit('current-midis', noteArray.map((note) => note.midi).sort())
-    emit(
-      'current-notes',
-      noteArray.map((note) => note.name),
-    )
+    const sortedMidis: MidiArray = noteArray
+      .map((note) => note.midi)
+      .filter((x): x is number => typeof x === 'number')
+      .sort()
+    emit('currentMidis', sortedMidis)
 
-    const usableNoteArray = Array.from(new Set(noteArray.map((note) => note.midi))).sort()
+    const noteNames: string[] = noteArray.map((note) => note.name).filter((x): x is string => !!x)
+    emit('currentNotes', noteNames)
 
-    emit('current-chord', getChord(usableNoteArray))
+    const midiNumberArray: MidiArray = Array.from(
+      new Set(noteArray.map((note: Note) => note.midi)),
+    ).sort()
+    emit('currentChord', getChord(midiNumberArray))
   }
 }
 
-function getChord(midiNums: number[]): string {
+function getChord(midiNums: MidiArray = []): ChordName {
+  if (!midiNums || !midiNums.length) return ''
+
   if (midiNums.length > 2) {
-    const noteCount = midiNums.length
-    let chordName
+    let chordName: ChordName = ''
     let intval1, intval2, intval3, intval4
 
-    switch (noteCount) {
-      case 3: // triad
-        intval1 = midiNums[1] - midiNums[0]
-        intval2 = midiNums[2] - midiNums[1]
+    switch (midiNums.length) {
+      case 3: {
+        // triad
+        if (midiNums[0] && midiNums[1] && midiNums[2]) {
+          intval1 = midiNums[1] - midiNums[0]
+          intval2 = midiNums[2] - midiNums[1]
 
-        if (_arraysAreEqual([intval1, intval2], INTERVALS['5'])) {
-          chordName = `${_midi2Name(midiNums[0])}5`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['3add9'])) {
-          chordName = `${_midi2Name(midiNums[0])}add9`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['major'])) {
-          chordName = `${_midi2Name(midiNums[0])}maj`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['aug'])) {
-          chordName = `${_midi2Name(midiNums[0])}aug`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['minor'])) {
-          chordName = `${_midi2Name(midiNums[0])}min`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['dim'])) {
-          chordName = `${_midi2Name(midiNums[0])}dim`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus2'])) {
-          chordName = `${_midi2Name(midiNums[0])}sus2`
-        } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus4'])) {
-          chordName = `${_midi2Name(midiNums[0])}sus4`
-        } else {
+          console.log('intVals', intval1, intval2)
+
+          if (_arraysAreEqual([intval1, intval2], INTERVALS['5'])) {
+            chordName = `${_midi2Name(midiNums[0])}5`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['3add9'])) {
+            chordName = `${_midi2Name(midiNums[0])}add9`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['major'])) {
+            chordName = `${_midi2Name(midiNums[0])}maj`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['aug'])) {
+            chordName = `${_midi2Name(midiNums[0])}aug`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['minor'])) {
+            chordName = `${_midi2Name(midiNums[0])}min`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['dim'])) {
+            chordName = `${_midi2Name(midiNums[0])}dim`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus2'])) {
+            chordName = `${_midi2Name(midiNums[0])}sus2`
+          } else if (_arraysAreEqual([intval1, intval2], INTERVALS['sus4'])) {
+            chordName = `${_midi2Name(midiNums[0])}sus4`
+          } else {
+            chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+          }
+        }
+
+        break
+      }
+      case 4: {
+        if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3]) {
+          intval1 = midiNums[1] - midiNums[0]
+          intval2 = midiNums[2] - midiNums[1]
+          intval3 = midiNums[3] - midiNums[2]
+
+          if (midiNums[3] - midiNums[0] == 12) {
+            // we have an octave, so return triad instead
+            return getChord(midiNums.slice(0, midiNums.length - 1))
+          }
+
+          if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['4add9'])) {
+            chordName = `${_midi2Name(midiNums[0])}add9`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6'])) {
+            chordName = `${_midi2Name(midiNums[0])}6`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6sus2'])) {
+            chordName = `${_midi2Name(midiNums[0])}6sus2`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['dom7'])) {
+            chordName = `${_midi2Name(midiNums[0])}7`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['min7'])) {
+            chordName = `${_midi2Name(midiNums[0])}min7`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj7'])) {
+            chordName = `${_midi2Name(midiNums[0])}maj7`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj9'])) {
+            chordName = `${_midi2Name(midiNums[0])}maj9`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['7sus4'])) {
+            chordName = `${_midi2Name(midiNums[0])}7sus4`
+          } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['9sus4'])) {
+            chordName = `${_midi2Name(midiNums[0])}9sus4`
+          } else {
+            chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+          }
+        }
+
+        break
+      }
+      case 5: {
+        if (midiNums[0] && midiNums[1] && midiNums[2] && midiNums[3] && midiNums[4]) {
+          intval1 = midiNums[1] - midiNums[0]
+          intval2 = midiNums[2] - midiNums[1]
+          intval3 = midiNums[3] - midiNums[2]
+          intval4 = midiNums[4] - midiNums[3]
+
+          if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(b9)'])) {
+            chordName = `${_midi2Name(midiNums[0])}maj7(b9)`
+          } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(9)'])) {
+            chordName = `${_midi2Name(midiNums[0])}maj7(9)`
+          } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(s9)'])) {
+            chordName = `${_midi2Name(midiNums[0])}maj7(#9)`
+          } else {
+            chordName = `${_midi2Name(midiNums[0])}(unidentified)`
+          }
+        }
+
+        break
+      }
+      default: {
+        if (midiNums[0]) {
           chordName = `${_midi2Name(midiNums[0])}(unidentified)`
         }
 
         break
-
-      case 4:
-        intval1 = midiNums[1] - midiNums[0]
-        intval2 = midiNums[2] - midiNums[1]
-        intval3 = midiNums[3] - midiNums[2]
-
-        if (midiNums[3] - midiNums[0] == 12) {
-          // we have an octave, so return triad instead
-          return _getChord(midiNums.slice(0, midiNums.length - 1))
-        }
-
-        if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['4add9'])) {
-          chordName = `${_midi2Name(midiNums[0])}add9`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6'])) {
-          chordName = `${_midi2Name(midiNums[0])}6`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['6sus2'])) {
-          chordName = `${_midi2Name(midiNums[0])}6sus2`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['dom7'])) {
-          chordName = `${_midi2Name(midiNums[0])}7`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['min7'])) {
-          chordName = `${_midi2Name(midiNums[0])}min7`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj7'])) {
-          chordName = `${_midi2Name(midiNums[0])}maj7`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['maj9'])) {
-          chordName = `${_midi2Name(midiNums[0])}maj9`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['7sus4'])) {
-          chordName = `${_midi2Name(midiNums[0])}7sus4`
-        } else if (_arraysAreEqual([intval1, intval2, intval3], INTERVALS['9sus4'])) {
-          chordName = `${_midi2Name(midiNums[0])}9sus4`
-        } else {
-          chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-        }
-
-        break
-
-      case 5:
-        intval1 = midiNums[1] - midiNums[0]
-        intval2 = midiNums[2] - midiNums[1]
-        intval3 = midiNums[3] - midiNums[2]
-        intval4 = midiNums[4] - midiNums[3]
-
-        if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(b9)'])) {
-          chordName = `${_midi2Name(midiNums[0])}maj7(b9)`
-        } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(9)'])) {
-          chordName = `${_midi2Name(midiNums[0])}maj7(9)`
-        } else if (_arraysAreEqual([intval1, intval2, intval3, intval4], INTERVALS['maj7(s9)'])) {
-          chordName = `${_midi2Name(midiNums[0])}maj7(#9)`
-        } else {
-          chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-        }
-
-        break
-
-      default:
-        chordName = `${_midi2Name(midiNums[0])}(unidentified)`
-
-        break
+      }
     }
 
     return chordName
@@ -318,13 +364,13 @@ function getChord(midiNums: number[]): string {
   }
 }
 
-function getNotes(): object[] {
+function getNotes(): NoteArray {
   const pressedNotes: HTMLElement[] = Array.from(
     document.querySelectorAll('.fret[data-pressed="true"]'),
   )
-  const fretIds: string[] = pressedNotes.map((note: HTMLElement) => note.dataset.fretId)
+  const fretIds: string[] = pressedNotes.map((note: HTMLElement) => note.dataset.fretId ?? '')
 
-  let noteArray: Object[] = []
+  let noteArray: NoteArray = []
 
   fretIds.forEach((fretId) => {
     MUSICAL_NOTES.forEach((musNote) => {
@@ -378,17 +424,9 @@ function getNotes(): object[] {
       <div data-string-note-id="1">E<sub>2</sub></div>
     </div>
 
-    <div id="string-open-spaces">
-      <div class="fret" @click="toggleFret" data-pressed="false" data-fret-id="6_0"></div>
-      <div class="fret" @click="toggleFret" data-pressed="false" data-fret-id="5_0"></div>
-      <div class="fret" @click="toggleFret" data-pressed="false" data-fret-id="4_0"></div>
-      <div class="fret" @click="toggleFret" data-pressed="false" data-fret-id="3_0"></div>
-      <div class="fret" @click="toggleFret" data-pressed="false" data-fret-id="2_0"></div>
-      <div class="fret" @click="toggleFret" data-pressed="false" data-fret-id="1_0"></div>
-    </div>
-
     <div id="strings">
       <div class="string" data-string-id="6">
+        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="6_0"></div>
         <div
           class="fret"
           @click="toggleFret"
@@ -607,6 +645,7 @@ function getNotes(): object[] {
         </div>
       </div>
       <div class="string" data-string-id="5">
+        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="5_0"></div>
         <div
           class="fret"
           @click="toggleFret"
@@ -825,6 +864,7 @@ function getNotes(): object[] {
         </div>
       </div>
       <div class="string" data-string-id="4">
+        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="4_0"></div>
         <div
           class="fret"
           @click="toggleFret"
@@ -1043,6 +1083,7 @@ function getNotes(): object[] {
         </div>
       </div>
       <div class="string" data-string-id="3">
+        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="3_0"></div>
         <div
           class="fret"
           @click="toggleFret"
@@ -1261,6 +1302,7 @@ function getNotes(): object[] {
         </div>
       </div>
       <div class="string" data-string-id="2">
+        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="2_0"></div>
         <div
           class="fret"
           @click="toggleFret"
@@ -1479,6 +1521,7 @@ function getNotes(): object[] {
         </div>
       </div>
       <div class="string" data-string-id="1">
+        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="1_0"></div>
         <div
           class="fret"
           @click="toggleFret"
@@ -1706,52 +1749,36 @@ function getNotes(): object[] {
   font-size: 1rem;
 
   div {
-    border: 1px solid gray;
     font-weight: 700;
     margin: 0;
-    padding: 0.2em 0;
+    padding: 0.3em 0;
     text-align: center;
     width: 1.75rem;
     writing-mode: sideways-lr;
   }
 }
 
-#string-notes {
-  align-items: center;
-  border: 1px solid gray;
-  display: flex;
-  flex-direction: column;
-  font-size: 1rem;
-  font-weight: 700;
-  margin-top: 2px;
-  width: 1.75rem;
-
-  div {
-    align-items: center;
-    display: flex;
-    height: 1.75rem;
-  }
-}
-
-#string-open-spaces {
-  display: flex;
-  flex-direction: column;
-  margin-top: 2px;
-  width: 1.75rem;
-
-  div {
-    height: 1.75rem;
-
-    &:hover {
-      background: #fff3a5;
-      cursor: pointer;
-    }
-  }
-}
-
 #fretboard {
   display: flex;
   flex-direction: row;
+
+  #string-notes {
+    align-items: center;
+    border: 2px solid #000;
+    display: flex;
+    flex-direction: column;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-top: 0;
+    padding: 0 0.5em;
+    width: 1.75rem;
+
+    div {
+      align-items: center;
+      display: flex;
+      height: 1.75rem;
+    }
+  }
 
   #strings {
     border-bottom: 2px solid #000;
@@ -1769,7 +1796,8 @@ function getNotes(): object[] {
 
     .fret {
       align-items: center;
-      border-left: 2px solid #000;
+
+      border-right: 2px solid #000;
       display: flex;
       justify-content: center;
       padding: 0;
@@ -1778,31 +1806,39 @@ function getNotes(): object[] {
 
       &:hover {
         background: #fff3a5;
-        border: 1px solid orange;
+        border-right: 2px solid #ffa500;
         cursor: pointer;
+      }
 
-        &.pressed {
-          background: #8edf82;
+      &.pressed,
+      &.pressed:hover {
+        background: #8edf82;
+        border-right: 2px solid #299519;
+        border: none;
+
+        hr {
+          border-top-color: #51bb41;
         }
       }
 
       &:first-of-type {
         border-left: 1px solid #ccc;
+        border-right: none;
+        border-top: none;
       }
-      &:last-of-type {
-        border-right: 2px solid #727272;
+      &:nth-of-type(1) {
+        border-left: none;
+      }
+      &:nth-of-type(2) {
+        border-left: 2px solid #000;
       }
 
       hr {
         border: none;
-        border-top: 2px solid rgb(152, 152, 152);
+        border-top: 2px solid #adadad;
         width: 100%;
       }
     }
   }
-}
-
-.pressed {
-  background: #8edf82;
 }
 </style>
