@@ -253,7 +253,13 @@ function toggleFret(event: PointerEvent): void {
       .sort()
     emit('currentMidis', sortedMidis)
 
-    const noteNames: string[] = noteArray.map((note) => note.name).filter((x): x is string => !!x)
+    function compareNotes(a: Note, b: Note): number {
+      return a.midi - b.midi
+    }
+    const noteNames: string[] = noteArray
+      .sort(compareNotes)
+      .map((note) => note.name)
+      .filter((x): x is string => !!x)
     emit('currentNotes', noteNames)
 
     const midiNumberArray: MidiArray = Array.from(
