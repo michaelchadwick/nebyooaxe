@@ -2,6 +2,12 @@
 import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
 
+const appKey = ref(0)
+
+const forceRerender = () => {
+  appKey.value++
+}
+
 type FretArray = string[]
 type IntervalsArray = number[][]
 type MidiArray = number[]
@@ -38,6 +44,7 @@ function currentChord(newChord: ChordName[]): void {
 
   <main>
     <Fretboard
+      :key="appKey"
       @current-frets="currentFrets"
       @current-midis="currentMidis"
       @current-notes="currentNotes"
@@ -45,20 +52,22 @@ function currentChord(newChord: ChordName[]): void {
       @current-chord="currentChord"
     />
 
-    <div id="current-frets" :class="{ empty: !frets.length }">
-      <strong>Frets</strong>: {{ frets.length ? frets : '' }}
-    </div>
-    <div id="current-midis" :class="{ empty: !midis.length }">
-      <strong>Midis</strong>: {{ midis.length ? midis : '' }}
-    </div>
-    <div id="current-notes" :class="{ empty: !notes.length }">
-      <strong>Notes</strong>: {{ notes.length ? notes : '' }}
-    </div>
-    <div id="current-invls" :class="{ empty: !invls.length }">
-      <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
-    </div>
-    <div id="current-chord" :class="{ empty: !chord.length }">
-      <strong>Chord</strong>: {{ chord ? chord : '' }}
+    <div id="note-stats" :key="appKey">
+      <div id="current-frets" :class="{ empty: !frets.length }">
+        <strong>Frets</strong>: {{ frets.length ? frets : '' }}
+      </div>
+      <div id="current-midis" :class="{ empty: !midis.length }">
+        <strong>Midis</strong>: {{ midis.length ? midis : '' }}
+      </div>
+      <div id="current-notes" :class="{ empty: !notes.length }">
+        <strong>Notes</strong>: {{ notes.length ? notes : '' }}
+      </div>
+      <div id="current-invls" :class="{ empty: !invls.length }">
+        <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
+      </div>
+      <div id="current-chord" :class="{ empty: !chord.length }">
+        <strong>Chord</strong>: {{ chord ? chord : '' }}
+      </div>
     </div>
   </main>
 </template>
