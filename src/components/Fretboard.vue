@@ -258,54 +258,52 @@ function toggleFret(event: PointerEvent): void {
   }
 }
 
-// TODO
-// translate more INTERVALS -> CHORD_PATTERNS
-// const INTERVALS = {
-//   5: [7, 5],
-//   '3add9': [2, 2],
-//   '4add9': [2, 2, 3],
-//   major: [4, 3],
-//   aug: [4, 4],
-//   minor: [3, 4],
-//   dim: [3, 3],
-//   sus2: [2, 5],
-//   sus4: [5, 2],
-//   6: [4, 3, 2],
-//   '6sus2': [2, 5, 2],
-//   dom7: [4, 3, 3],
-//   min7: [3, 4, 3],
-//   maj7: [4, 3, 4],
-//   maj9: [4, 7, 3],
-//   'maj7(b9)': [4, 3, 4, 2],
-//   'maj7(9)': [4, 3, 4, 3],
-//   'maj7(s9)': [4, 3, 4, 4],
-//   '7sus4': [5, 2, 3],
-//   '9sus4': [2, 3, 5],
-// }
-const CHORD_PATTERNS: Record<string, string> = {
+const CHORD_PATTERNS: Record<string, string[]> = {
   // Triads
-  '0,7': '5',
-  '0,4,7': 'maj',
-  '0,3,7': 'min',
-  '0,3,6': 'dim',
-  '0,4,8': 'aug',
+  '0,7': ['5'],
+  '0,4,7': ['maj'],
+  '0,3,7': ['min'],
+  '0,3,6': ['dim'],
+  '0,4,8': ['aug'],
+  '0,2,7': ['sus2'],
+  '0,5,7': ['sus4'],
+
+  // Sixth chords
+  '0,4,7,9': ['6'],
+  '0,3,7,9': ['m6'],
+  '0,2,9': ['6sus2'],
+  '0,2,4,9': ['6/9'],
+  '0,4,6,9': ['6sus2'],
 
   // Seventh chords
-  '0,4,7,11': 'maj7',
-  '0,4,7,10': '7', // dominant‑7th
-  '0,3,7,10': 'min7',
-  '0,3,6,9': 'hdim7', // half‑diminished
+  '0,2,7,10': ['7sus2'],
+  '0,4,7,11': ['maj7'],
+  '0,4,7,10': ['7'], // dominant‑7th
+  '0,3,7,10': ['min7'],
+  '0,3,6,9': ['dim7'], // half‑diminished
+  '0,1,4,10': ['7b9'],
+  '0,3,4,10': ['7#9'],
 
-  // Suspensions & added tones
-  '0,2,7': 'sus2',
-  '0,5,7': 'sus4',
-  '0,4,7,14': 'add9',
-  '0,3,7,14': 'minadd9',
+  // Ninth chord
+  '0,2,3,10': ['m9'],
+  '0,2,4,10': ['9'],
 
-  // Extensions (optional)
-  '0,4,7,11,14': 'maj9',
-  '0,3,7,10,14': 'dom9',
-  '0,3,7,10,14,21': 'dom13',
+  // Replaced tones
+  '0,2,4': ['(add2)'], // add2 (weak add9)
+  '0,2,3': ['m(add2)'], // add2 (weak (min)add9)
+  // Added tones
+  '0,4,7,14': ['(add9)'], // proper add9
+  '0,2,3,7': ['m(add9)'], // proper (min)add9
+  '0,3,7,14': ['m(add9)'], // proper (min)add9
+
+  // Extensions
+  '0,4,7,11,14': ['maj9'], // 9th
+  '0,2,4,7,11': ['maj9'],
+  '0,3,7,10,14': ['dom9'],
+  '0,3,7,10,14,21': ['dom13'],
+
+  // Enharmonic chords
+  '0,2,4,7': ['(add9)'], // add9 (and 6sus4?)
 }
 
 const NOTE_NAMES_SHARP: string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
@@ -326,22 +324,32 @@ function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
   if (midiNums.length > 2) {
     const pitchClasses: Set<PitchClass> = new Set(midiNums.map(_midiToPitchClass))
     const possibleChords: ChordName[] = []
+    const possibleInvls: number[][] = []
 
     for (const root of Array.from(pitchClasses)) {
       const intervals = Array.from(pitchClasses)
         .map((pc) => (pc - root + 12) % 12)
         .sort((a, b) => a - b)
 
-      emit('currentInvls', intervals)
-
       const key = intervals.join(',')
-      const type = CHORD_PATTERNS[key]
+      let types: string[][] = []
+      Object.keys(CHORD_PATTERNS).forEach((patternKey) => {
+        if (patternKey == key && CHORD_PATTERNS[key]) {
+          types.push(CHORD_PATTERNS[key])
+        }
+      })
 
-      if (type) {
-        const name = _pitchClassName(root, useFlatNotation)
-        possibleChords.push(`${name}${type}`)
+      if (types) {
+        types.forEach((type) => {
+          const name = _pitchClassName(root, useFlatNotation)
+          possibleInvls.push(intervals)
+
+          possibleChords.push(`${name}${type}`)
+        })
       }
     }
+
+    emit('currentInvls', possibleInvls)
 
     return possibleChords
   } else {
