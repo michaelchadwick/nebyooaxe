@@ -167,97 +167,6 @@ const MUSICAL_NOTES: Note[] = [
   new Note('Bb8', 7458.62, 118),
   new Note('B8', 7902.13, 119),
 ]
-
-const _arraysAreEqual = (arr1: number[], arr2: number[]): boolean => {
-  return arr1.join() == arr2.join()
-}
-const _midi2Name = (midiNumber: number): string => {
-  const note = MUSICAL_NOTES.filter((mNote) => mNote.midi == midiNumber)
-
-  if (note.length) {
-    if (note[0]) {
-      const name = note[0].name
-      return name[1] == 'b' ? `${name[0]}${name[1]}` : `${name[0]}`
-    } else {
-      return ''
-    }
-  } else {
-    return ''
-  }
-}
-
-// fret is being pressed or unpressed
-// update frets, midis, notes
-// try to decipher chord(s)
-function toggleFret(event: PointerEvent): void {
-  if (event.target instanceof HTMLElement) {
-    let elem
-
-    if (event.target.tagName == 'HR') {
-      elem = event.target.parentElement
-    } else {
-      elem = event.target
-    }
-
-    const stringId = elem?.parentElement?.dataset.stringId
-    const fretId = elem?.dataset.fretId
-    const classes = elem?.classList
-    const dataset = elem?.dataset
-
-    if (dataset?.pressed == 'false') {
-      const stringFretsPressed: NodeList = document.querySelectorAll(
-        `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
-      )
-
-      if (stringFretsPressed && stringFretsPressed.length) {
-        stringFretsPressed.forEach((fret: Node) => {
-          if (fret instanceof HTMLElement) {
-            fret.dataset.pressed = 'false'
-            fret.classList.remove('pressed')
-            fretsPressed.value = fretsPressed.value.filter(
-              (fretPressed) => fretPressed != fret.dataset.fretId,
-            )
-          }
-        })
-      }
-      dataset.pressed = 'true'
-      classes?.add('pressed')
-      fretsPressed.value = [...fretsPressed.value, fretId ?? '']
-    } else {
-      if (dataset !== undefined) {
-        dataset.pressed = 'false'
-      }
-      classes?.remove('pressed')
-      fretsPressed.value = fretsPressed.value.filter((fret) => fret != fretId)
-    }
-
-    const sortedFrets: FretArray = fretsPressed.value ? [...fretsPressed.value].sort() : []
-    emit('currentFrets', sortedFrets)
-
-    const noteArray: NoteArray = getNotes()
-
-    const unsortedMidis: MidiArray = noteArray.map((note) => note.midi)
-    const sortedMidis: MidiArray = unsortedMidis
-      .filter((x): x is number => typeof x === 'number')
-      .sort()
-    emit('currentMidis', sortedMidis)
-
-    function compareNotes(a: Note, b: Note): number {
-      return a.midi - b.midi
-    }
-    const noteNames: string[] = noteArray
-      .sort(compareNotes)
-      .map((note) => note.name)
-      .filter((x): x is string => !!x)
-    emit('currentNotes', noteNames)
-
-    let midiNumberArray: MidiArray = Array.from(
-      new Set(noteArray.map((note: Note) => note.midi)),
-    ).sort()
-    emit('currentChord', getChord(midiNumberArray))
-  }
-}
-
 const CHORD_PATTERNS: Record<string, string[]> = {
   // Triads
   '0,7': ['5'],
@@ -305,9 +214,112 @@ const CHORD_PATTERNS: Record<string, string[]> = {
   // Enharmonic chords
   '0,2,4,7': ['(add9)'], // add9 (and 6sus4?)
 }
-
 const NOTE_NAMES_SHARP: string[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B']
 const NOTE_NAMES_FLAT: string[] = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B']
+const FRET_NOTE: Record<string, string[]> = {
+  '6': ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'],
+  '5': ['B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#'],
+  '4': ['G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#'],
+  '3': ['D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#'],
+  '2': ['A', 'A#', 'B', 'C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#'],
+  '1': ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'],
+}
+
+// fret is being pressed or unpressed
+// update frets, midis, notes
+// try to decipher chord(s)
+function toggleFret(event: PointerEvent): void {
+  if (event.target instanceof HTMLElement) {
+    let elem
+
+    if (event.target.tagName == 'HR') {
+      elem = event.target.parentElement
+    } else {
+      elem = event.target
+    }
+
+    if (elem) {
+      const stringId: string | undefined = elem.parentElement?.dataset.stringId
+      const fretId: string | undefined = elem.dataset.fretId
+      const classes = elem.classList
+      const dataset = elem.dataset
+
+      // toggle from unpressed to pressed: remove HR, add note-bubble
+      if (dataset?.pressed == 'false') {
+        const stringFretsPressed: NodeList = document.querySelectorAll(
+          `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
+        )
+
+        // remove all other pressed notes
+        if (stringFretsPressed.length) {
+          stringFretsPressed.forEach((fret: Node) => {
+            if (fret instanceof HTMLElement) {
+              fret.dataset.pressed = 'false'
+              fret.classList.remove('pressed')
+              fretsPressed.value = fretsPressed.value.filter(
+                (fretPressed) => fretPressed != fret.dataset.fretId,
+              )
+              if (!fret.classList.contains('open')) {
+                fret.classList.add('empty')
+              }
+
+              fret.innerHTML = ''
+            }
+          })
+        }
+        dataset.pressed = 'true'
+        classes?.remove('empty')
+        classes?.add('pressed', 'note-bubble')
+        fretsPressed.value = [...fretsPressed.value, fretId ?? '']
+
+        if (stringId !== undefined && fretId !== undefined) {
+          const noteIndex = Number(fretId.slice(2)) % 12
+          if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
+            elem.innerHTML = FRET_NOTE[stringId][noteIndex]
+          }
+        }
+      }
+      // toggle from pressed to unpressed: remove note-bubble, add HR
+      else {
+        if (dataset !== undefined) {
+          dataset.pressed = 'false'
+        }
+        classes?.remove('pressed', 'note-bubble')
+        fretsPressed.value = fretsPressed.value.filter((fret) => fret != fretId)
+
+        if (!classes.contains('open')) {
+          classes.add('empty')
+        }
+        elem.innerHTML = ''
+      }
+    }
+
+    const sortedFrets: FretArray = fretsPressed.value ? [...fretsPressed.value].sort() : []
+    emit('currentFrets', sortedFrets)
+
+    const noteArray: NoteArray = getNotes()
+
+    const unsortedMidis: MidiArray = noteArray.map((note) => note.midi)
+    const sortedMidis: MidiArray = unsortedMidis
+      .filter((x): x is number => typeof x === 'number')
+      .sort()
+    emit('currentMidis', sortedMidis)
+
+    function compareNotes(a: Note, b: Note): number {
+      return a.midi - b.midi
+    }
+    const noteNames: string[] = noteArray
+      .sort(compareNotes)
+      .map((note) => note.name)
+      .filter((x): x is string => !!x)
+    emit('currentNotes', noteNames)
+
+    let midiNumberArray: MidiArray = Array.from(
+      new Set(noteArray.map((note: Note) => note.midi)),
+    ).sort()
+    emit('currentChord', getChord(midiNumberArray))
+  }
+}
 
 function _midiToPitchClass(n: MidiNote): PitchClass {
   return ((n % 12) + 12) % 12
@@ -418,1319 +430,1037 @@ function getNotes(): NoteArray {
     </div>
 
     <div id="strings">
-      <div class="string" data-string-id="6">
+      <div class="string" data-string-id="6" data-note-id="E">
         <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="6_0"></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_1"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_2"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_3"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_4"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_5"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_6"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_7"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_8"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_9"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_10"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_11"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_12"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_13"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_14"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_15"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_16"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_17"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_18"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_19"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_20"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_21"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_22"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_23"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="6_24"
-        >
-          <hr />
-        </div>
+        ></div>
       </div>
-      <div class="string" data-string-id="5">
+      <div class="string" data-string-id="5" data-note-id="B">
         <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="5_0"></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_1"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_2"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_3"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_4"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_5"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_6"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_7"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_8"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_9"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_10"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_11"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_12"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_13"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_14"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_15"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_16"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_17"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_18"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_19"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_20"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_21"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_22"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_23"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="5_24"
-        >
-          <hr />
-        </div>
+        ></div>
       </div>
-      <div class="string" data-string-id="4">
+      <div class="string" data-string-id="4" data-note-id="G">
         <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="4_0"></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_1"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_2"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_3"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_4"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_5"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_6"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_7"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_8"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_9"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_10"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_11"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_12"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_13"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_14"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_15"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_16"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_17"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_18"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_19"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_20"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_21"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_22"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_23"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="4_24"
-        >
-          <hr />
-        </div>
+        ></div>
       </div>
-      <div class="string" data-string-id="3">
+      <div class="string" data-string-id="3" data-note-id="D">
         <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="3_0"></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_1"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_2"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_3"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_4"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_5"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_6"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_7"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_8"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_9"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_10"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_11"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_12"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_13"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_14"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_15"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_16"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_17"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_18"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_19"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_20"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_21"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_22"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_23"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="3_24"
-        >
-          <hr />
-        </div>
+        ></div>
       </div>
-      <div class="string" data-string-id="2">
+      <div class="string" data-string-id="2" data-note-id="A">
         <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="2_0"></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_1"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_2"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_3"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_4"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_5"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_6"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_7"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_8"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_9"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_10"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_11"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_12"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_13"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_14"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_15"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_16"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_17"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_18"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_19"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_20"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_21"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_22"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_23"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="2_24"
-        >
-          <hr />
-        </div>
+        ></div>
       </div>
-      <div class="string" data-string-id="1">
-        <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="1_0"></div>
+      <div class="string" data-string-id="1" data-note-id="E">
         <div
-          class="fret"
+          class="fret open"
+          @click="toggleFret"
+          data-pressed="false"
+          data-note-id=""
+          data-fret-id="1_0"
+        ></div>
+        <div
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_1"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_2"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_3"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_4"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_5"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_6"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_7"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_8"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_9"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_10"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_11"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_12"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_13"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_14"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_15"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_16"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_17"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_18"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_19"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_20"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_21"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_22"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_23"
-        >
-          <hr />
-        </div>
+        ></div>
         <div
-          class="fret"
+          class="fret empty"
           @click="toggleFret"
           data-pressed="false"
           data-note-id=""
           data-fret-id="1_24"
-        >
-          <hr />
-        </div>
+        ></div>
       </div>
     </div>
   </div>
@@ -1794,8 +1524,21 @@ function getNotes(): NoteArray {
       display: flex;
       justify-content: center;
       padding: 0;
+      position: relative;
       height: 1.75rem;
       width: 1.75rem;
+
+      &.empty::after {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 2px;
+        background: var(--vt-c-gray-dark);
+        position: absolute;
+        top: 50%;
+        left: 0;
+        transform: translateY(-50%);
+      }
 
       &:hover {
         background: var(--vt-c-yellow);
@@ -1809,8 +1552,18 @@ function getNotes(): NoteArray {
         border-right: 2px solid var(--vt-c-green-dark);
         border: none;
 
-        hr {
-          border-top-color: var(--vt-c-green);
+        &.note-bubble {
+          border: 10px var(--vt-c-green-dark);
+          border-right: 2px solid var(--vt-c-black);
+          border-radius: 16px;
+          color: var(--vt-c-black);
+          z-index: 10;
+
+          &:hover {
+            background: var(--vt-c-yellow);
+            border-color: var(--vt-c-yellow);
+            border-right: 2px solid var(--vt-c-black);
+          }
         }
       }
 
@@ -1825,20 +1578,7 @@ function getNotes(): NoteArray {
       &:nth-of-type(2) {
         border-left: 2px solid var(--vt-c-black-true);
       }
-
-      hr {
-        border: none;
-        border-top: 2px solid var(--vt-c-gray-dark);
-        width: 100%;
-      }
     }
-  }
-
-  .note-bubble {
-    border: 3px var(--vt-c-green-dark);
-    border-radius: 16px;
-    color: var(--vt-c-green);
-    z-index: 10;
   }
 }
 </style>
