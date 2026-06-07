@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+const ctx = new window.AudioContext()
 const fretsPressed = ref<string[]>([])
 
 const emit = defineEmits([
@@ -225,6 +226,14 @@ const FRET_NOTE: Record<string, string[]> = {
   '1': ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'],
 }
 
+function getFretsPressed(stringId: string): NodeList | null {
+  const frets: NodeList = document.querySelectorAll(
+    `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
+  )
+
+  return frets ?? null
+}
+
 // fret is being pressed or unpressed
 // update frets, midis, notes
 // try to decipher chord(s)
@@ -246,81 +255,42 @@ function toggleFret(event: PointerEvent): void {
 
       // toggle from unpressed to pressed: remove HR, add note-bubble
       if (dataset?.pressed == 'false') {
-        const stringFretsPressed: NodeList = document.querySelectorAll(
-          `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
-        )
+        if (stringId) {
+          const stringFretsPressed: NodeList | null = getFretsPressed(stringId)
 
-        // remove all other pressed notes
-        if (stringFretsPressed.length) {
-          stringFretsPressed.forEach((fret: Node) => {
-            if (fret instanceof HTMLElement) {
-              fret.dataset.pressed = 'false'
-              fret.classList.remove('pressed')
-              fretsPressed.value = fretsPressed.value.filter(
-                (fretPressed) => fretPressed != fret.dataset.fretId,
-              )
-              if (!fret.classList.contains('open')) {
-                fret.classList.add('empty')
+          // remove all other pressed notes
+          if (stringFretsPressed && stringFretsPressed.length) {
+            stringFretsPressed.forEach((fret: Node) => {
+              if (fret instanceof HTMLElement) {
+                fret.dataset.pressed = 'false'
+                fret.classList.remove('pressed')
+                fretsPressed.value = fretsPressed.value.filter(
+                  (fretPressed) => fretPressed != fret.dataset.fretId,
+                )
+                if (!fret.classList.contains('open')) {
+                  fret.classList.add('empty')
+                }
+
+                fret.innerHTML = ''
               }
+            })
+          }
+          dataset.pressed = 'true'
+          classes?.remove('empty')
+          classes?.add('pressed', 'note-bubble')
+          fretsPressed.value = [...fretsPressed.value, fretId ?? '']
 
-              fret.innerHTML = ''
+          if (stringId !== undefined && fretId !== undefined) {
+            const noteIndex = Number(fretId.slice(2)) % 12
+            if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
+              elem.innerHTML = FRET_NOTE[stringId][noteIndex]
             }
-          })
-        }
-        dataset.pressed = 'true'
-        classes?.remove('empty')
-        classes?.add('pressed', 'note-bubble')
-        fretsPressed.value = [...fretsPressed.value, fretId ?? '']
-
-        if (stringId !== undefined && fretId !== undefined) {
-          const noteIndex = Number(fretId.slice(2)) % 12
-          if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
-            elem.innerHTML = FRET_NOTE[stringId][noteIndex]
-          }
-        }
-
-        // play note
-        if (fretId) {
-          const ctx = new window.AudioContext()
-          const masterGainNode = ctx.createGain()
-          const startGain = 0.0001
-          const endGain = 0.1
-          masterGainNode.gain.value = startGain
-
-          // main note
-          const osc = ctx.createOscillator()
-          osc.type = 'square'
-          const noteFreq = MUSICAL_NOTES.filter((n) => n.fretIds.includes(fretId))[0]?.frequency
-          if (noteFreq) {
-            osc.frequency.value = noteFreq
           }
 
-          // LFO for vibrato
-          const lfo = ctx.createOscillator()
-          lfo.type = 'sine' // simple smooth tremor
-          lfo.frequency.value = 8 // 5–8 Hz is classic vibrato speed
-
-          // Gain that sets the *depth* of the frequency modulation
-          const lfoGain = ctx.createGain()
-          // Depth: ±0.05 Hz (~1 cent) → adjust to taste (try 0.2, 0.5, etc.)
-          lfoGain.gain.value = 0.35 // 30 cents ≈ a perfect‑4 in pitch
-          // If you want *relative* depth use detune instead:
-          const lfoDetune = ctx.createGain()
-          lfoDetune.gain.value = 50 // ±50 cents
-
-          lfo.connect(lfoGain)
-          lfoGain.connect(osc.detune)
-          lfo.start()
-
-          osc.connect(masterGainNode)
-          masterGainNode.connect(ctx.destination)
-
-          osc.start(ctx.currentTime)
-          masterGainNode.gain.exponentialRampToValueAtTime(endGain, ctx.currentTime + 0.2)
-
-          masterGainNode.gain.exponentialRampToValueAtTime(startGain, ctx.currentTime + 2.1)
-          osc.stop(ctx.currentTime + 2.1)
-          lfo.stop(ctx.currentTime + 2.1)
+          // play note
+          if (fretId) {
+            playNote(fretId)
+          }
         }
       }
       // toggle from pressed to unpressed: remove note-bubble, add HR
@@ -431,9 +401,68 @@ function getNotes(): NoteArray {
 
   return noteArray
 }
+
+function playNote(fretId: string): void {
+  const masterGainNode = ctx.createGain()
+  const startGain = 0.0001
+  const endGain = 0.1
+  masterGainNode.gain.value = startGain
+
+  // main note
+  const osc = ctx.createOscillator()
+  osc.type = 'square'
+  const noteFreq = MUSICAL_NOTES.filter((n) => n.fretIds.includes(fretId))[0]?.frequency
+  if (noteFreq) {
+    osc.frequency.value = noteFreq
+  }
+
+  // LFO for vibrato
+  const lfo = ctx.createOscillator()
+  lfo.type = 'sine' // simple smooth tremor
+  lfo.frequency.value = 8 // 5–8 Hz is classic vibrato speed
+
+  // Gain that sets the *depth* of the frequency modulation
+  const lfoGain = ctx.createGain()
+  // Depth: ±0.05 Hz (~1 cent) → adjust to taste (try 0.2, 0.5, etc.)
+  lfoGain.gain.value = 0.35 // 30 cents ≈ a perfect‑4 in pitch
+  // If you want *relative* depth use detune instead:
+  const lfoDetune = ctx.createGain()
+  lfoDetune.gain.value = 50 // ±50 cents
+
+  lfo.connect(lfoGain)
+  lfoGain.connect(osc.detune)
+  lfo.start()
+
+  osc.connect(masterGainNode)
+  masterGainNode.connect(ctx.destination)
+
+  osc.start(ctx.currentTime)
+  masterGainNode.gain.exponentialRampToValueAtTime(endGain, ctx.currentTime + 0.2)
+
+  masterGainNode.gain.exponentialRampToValueAtTime(startGain, ctx.currentTime + 2.1)
+  osc.stop(ctx.currentTime + 2.1)
+  lfo.stop(ctx.currentTime + 2.1)
+}
+function playChord(fretIds: string[]): void {
+  if (fretIds[0]) {
+    playNote(fretIds[0])
+  }
+  let delay = 50
+  let index = 1
+  fretIds.slice(1).forEach((fretId) => {
+    setTimeout(() => playNote(fretId), delay * index)
+    index++
+  })
+}
 </script>
 
 <template>
+  <div id="play-chord">
+    <button @click="playChord(fretsPressed)" :disabled="fretsPressed.length < 2">
+      Strum Notes
+    </button>
+  </div>
+
   <div id="fretboard-viewport">
     <div id="fretboard-numbers">
       <div></div>
@@ -1513,6 +1542,13 @@ function getNotes(): NoteArray {
 </template>
 
 <style scoped>
+#play-chord {
+  align-items: flex-start;
+  display: flex;
+  justify-content: center;
+  padding-bottom: 1em;
+}
+
 #fretboard-viewport {
   overflow-x: visible;
 
