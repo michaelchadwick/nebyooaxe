@@ -278,6 +278,50 @@ function toggleFret(event: PointerEvent): void {
             elem.innerHTML = FRET_NOTE[stringId][noteIndex]
           }
         }
+
+        // play note
+        if (fretId) {
+          const ctx = new window.AudioContext()
+          const masterGainNode = ctx.createGain()
+          const startGain = 0.0001
+          const endGain = 0.1
+          masterGainNode.gain.value = startGain
+
+          // main note
+          const osc = ctx.createOscillator()
+          osc.type = 'square'
+          const noteFreq = MUSICAL_NOTES.filter((n) => n.fretIds.includes(fretId))[0]?.frequency
+          if (noteFreq) {
+            osc.frequency.value = noteFreq
+          }
+
+          // LFO for vibrato
+          const lfo = ctx.createOscillator()
+          lfo.type = 'sine' // simple smooth tremor
+          lfo.frequency.value = 8 // 5–8 Hz is classic vibrato speed
+
+          // Gain that sets the *depth* of the frequency modulation
+          const lfoGain = ctx.createGain()
+          // Depth: ±0.05 Hz (~1 cent) → adjust to taste (try 0.2, 0.5, etc.)
+          lfoGain.gain.value = 0.35 // 30 cents ≈ a perfect‑4 in pitch
+          // If you want *relative* depth use detune instead:
+          const lfoDetune = ctx.createGain()
+          lfoDetune.gain.value = 50 // ±50 cents
+
+          lfo.connect(lfoGain)
+          lfoGain.connect(osc.detune)
+          lfo.start()
+
+          osc.connect(masterGainNode)
+          masterGainNode.connect(ctx.destination)
+
+          osc.start(ctx.currentTime)
+          masterGainNode.gain.exponentialRampToValueAtTime(endGain, ctx.currentTime + 0.2)
+
+          masterGainNode.gain.exponentialRampToValueAtTime(startGain, ctx.currentTime + 2.1)
+          osc.stop(ctx.currentTime + 2.1)
+          lfo.stop(ctx.currentTime + 2.1)
+        }
       }
       // toggle from pressed to unpressed: remove note-bubble, add HR
       else {
