@@ -1757,7 +1757,7 @@ function getNotes(): NoteArray {
 
   #string-notes {
     align-items: center;
-    border: 2px solid #000;
+    border: 2px solid var(--vt-c-black-true);
     display: flex;
     flex-direction: column;
     font-size: 1rem;
@@ -1774,8 +1774,8 @@ function getNotes(): NoteArray {
   }
 
   #strings {
-    border-bottom: 2px solid #000;
-    border-top: 2px solid #000;
+    border-bottom: 2px solid var(--vt-c-black-true);
+    border-top: 2px solid var(--vt-c-black-true);
   }
 
   .string {
@@ -1790,7 +1790,7 @@ function getNotes(): NoteArray {
     .fret {
       align-items: center;
 
-      border-right: 2px solid #000;
+      border-right: 2px solid var(--vt-c-black-true);
       display: flex;
       justify-content: center;
       padding: 0;
@@ -1798,24 +1798,24 @@ function getNotes(): NoteArray {
       width: 1.75rem;
 
       &:hover {
-        background: #fff3a5;
-        border-right: 2px solid #ffa500;
+        background: var(--vt-c-yellow);
+        border-right: 2px solid var(--vt-c-orange);
         cursor: pointer;
       }
 
       &.pressed,
       &.pressed:hover {
-        background: #8edf82;
-        border-right: 2px solid #299519;
+        background: var(--vt-c-green-light);
+        border-right: 2px solid var(--vt-c-green-dark);
         border: none;
 
         hr {
-          border-top-color: #51bb41;
+          border-top-color: var(--vt-c-green);
         }
       }
 
       &:first-of-type {
-        border-left: 1px solid #ccc;
+        border-left: 1px solid var(--vt-c-gray);
         border-right: none;
         border-top: none;
       }
@@ -1823,15 +1823,22 @@ function getNotes(): NoteArray {
         border-left: none;
       }
       &:nth-of-type(2) {
-        border-left: 2px solid #000;
+        border-left: 2px solid var(--vt-c-black-true);
       }
 
       hr {
         border: none;
-        border-top: 2px solid #adadad;
+        border-top: 2px solid var(--vt-c-gray-dark);
         width: 100%;
       }
     }
+  }
+
+  .note-bubble {
+    border: 3px var(--vt-c-green-dark);
+    border-radius: 16px;
+    color: var(--vt-c-green);
+    z-index: 10;
   }
 }
 </style>
