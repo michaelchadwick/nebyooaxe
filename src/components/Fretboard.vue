@@ -1590,7 +1590,6 @@ function resetFrets(): void {
   overflow-x: visible;
 
   @media (max-width: 768px) {
-    border: 1px solid #333;
     overflow-x: scroll;
     max-width: 90vw;
   }
