@@ -112,5 +112,10 @@ footer {
   right: 0;
   text-align: left;
   z-index: 2;
+
+  @media (min-width: 526px) {
+    height: 24px;
+    padding: 2px 18px;
+  }
 }
 </style>
