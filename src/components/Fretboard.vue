@@ -1673,10 +1673,12 @@ function resetFrets(): void {
         transform: translateY(-50%);
       }
 
-      &:hover {
-        background: var(--vt-c-yellow);
-        border-right: 2px solid var(--vt-c-orange);
-        cursor: pointer;
+      @media (hover: hover) {
+        &:hover {
+          background: var(--vt-c-yellow);
+          border-right: 2px solid var(--vt-c-orange);
+          cursor: pointer;
+        }
       }
 
       &.pressed,
@@ -1692,10 +1694,12 @@ function resetFrets(): void {
           color: var(--vt-c-black);
           z-index: 10;
 
-          &:hover {
-            background: var(--vt-c-yellow);
-            border-color: var(--vt-c-yellow);
-            border-right: 2px solid var(--vt-c-black);
+          @media (hover: hover) {
+            &:hover {
+              background: var(--vt-c-yellow);
+              border-color: var(--vt-c-yellow);
+              border-right: 2px solid var(--vt-c-black);
+            }
           }
         }
       }
