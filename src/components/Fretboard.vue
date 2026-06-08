@@ -226,7 +226,7 @@ const FRET_NOTE: Record<string, string[]> = {
   '1': ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'],
 }
 
-function getFretsPressed(stringId: string): NodeList | null {
+function getStringFretsPressed(stringId: string): NodeList | null {
   const frets: NodeList = document.querySelectorAll(
     `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
   )
@@ -253,10 +253,10 @@ function toggleFret(event: PointerEvent): void {
       const classes = elem.classList
       const dataset = elem.dataset
 
-      // toggle from unpressed to pressed: remove HR, add note-bubble
+      // toggle from unpressed to pressed: add note-bubble
       if (dataset?.pressed == 'false') {
         if (stringId) {
-          const stringFretsPressed: NodeList | null = getFretsPressed(stringId)
+          const stringFretsPressed: NodeList | null = getStringFretsPressed(stringId)
 
           // remove all other pressed notes
           if (stringFretsPressed && stringFretsPressed.length) {
@@ -293,7 +293,7 @@ function toggleFret(event: PointerEvent): void {
           }
         }
       }
-      // toggle from pressed to unpressed: remove note-bubble, add HR
+      // toggle from pressed to unpressed: remove note-bubble
       else {
         if (dataset !== undefined) {
           dataset.pressed = 'false'
@@ -305,6 +305,13 @@ function toggleFret(event: PointerEvent): void {
           classes.add('empty')
         }
         elem.innerHTML = ''
+
+        console.log(fretsPressed.value)
+
+        // if there are no more frets pressed, make sure to reset ref objects
+        if (!fretsPressed.value.length) {
+          emitEmpties()
+        }
       }
     }
 
@@ -459,7 +466,7 @@ function resetFrets(): void {
   const strings: string[] = ['6', '5', '4', '3', '2', '1']
 
   strings.forEach((stringId: string) => {
-    const stringFretsPressed: NodeList | null = getFretsPressed(stringId)
+    const stringFretsPressed: NodeList | null = getStringFretsPressed(stringId)
 
     // remove all other pressed notes
     if (stringFretsPressed && stringFretsPressed.length) {
@@ -480,6 +487,11 @@ function resetFrets(): void {
     }
   })
 
+  emitEmpties()
+}
+
+// reset all debug collections
+function emitEmpties(): void {
   emit('currentFrets', [])
   emit('currentMidis', [])
   emit('currentNotes', [])
@@ -491,9 +503,7 @@ function resetFrets(): void {
 <template>
   <div id="buttons">
     <div id="play-chord">
-      <button @click="playChord(fretsPressed)" :disabled="fretsPressed.length < 2">
-        Strum Notes
-      </button>
+      <button @click="playChord(fretsPressed)" :disabled="!fretsPressed.length">Strum Notes</button>
     </div>
     <div id="reset-notes">
       <button @click="resetFrets" :disabled="!fretsPressed.length">Reset Frets</button>
