@@ -39,7 +39,7 @@ function currentChord(newChord: ChordName[]): void {
 
 <template>
   <header>
-    <h1>NebyooAxe</h1>
+    <h1>Nebyoo<strong>Axe</strong></h1>
   </header>
 
   <main>
