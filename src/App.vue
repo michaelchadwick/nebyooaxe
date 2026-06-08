@@ -103,19 +103,15 @@ footer {
   font-family: 'Consolas', sans-serif;
   font-size: 12px;
   font-weight: 500;
-  height: 40px;
+  height: 20px;
   left: 0;
   letter-spacing: initial;
-  margin-top: 20px;
-  padding: 10px 18px;
-  position: absolute;
+  margin: 20px 0 0;
+  padding: 0 10px;
+  position: sticky;
   right: 0;
   text-align: left;
+  width: 100vw;
   z-index: 2;
-
-  @media (min-width: 526px) {
-    height: 24px;
-    padding: 2px 18px;
-  }
 }
 </style>
