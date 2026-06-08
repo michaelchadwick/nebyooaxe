@@ -89,6 +89,16 @@ main {
   line-height: 1.5;
 }
 
+#note-stats {
+  font-size: 0.9rem;
+  line-height: 1.2;
+  padding-top: 5px;
+
+  @media (min-width: 1200px) {
+    font-size: 1rem;
+  }
+}
+
 @media (min-width: 1200px) {
   header {
     place-items: center;
