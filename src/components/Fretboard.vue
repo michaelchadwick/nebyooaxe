@@ -306,8 +306,6 @@ function toggleFret(event: PointerEvent): void {
         }
         elem.innerHTML = ''
 
-        console.log(fretsPressed.value)
-
         // if there are no more frets pressed, make sure to reset ref objects
         if (!fretsPressed.value.length) {
           emitEmpties()
@@ -354,7 +352,7 @@ function _pitchClassName(pc: PitchClass, useFlat = false): string {
 function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
   if (!midiNums || !midiNums.length) return ['']
 
-  if (midiNums.length > 2) {
+  if (midiNums.length > 1) {
     const pitchClasses: Set<PitchClass> = new Set(midiNums.map(_midiToPitchClass))
     const possibleChords: ChordName[] = []
     const possibleInvls: number[][] = []
@@ -365,18 +363,18 @@ function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
         .sort((a, b) => a - b)
 
       const key = intervals.join(',')
-      let types: string[][] = []
+      let chordTypes: string[][] = []
       Object.keys(CHORD_PATTERNS).forEach((patternKey) => {
         if (patternKey == key && CHORD_PATTERNS[key]) {
-          types.push(CHORD_PATTERNS[key])
+          chordTypes.push(CHORD_PATTERNS[key])
         }
       })
 
-      if (types) {
-        types.forEach((type) => {
-          const name = _pitchClassName(root, useFlatNotation)
-          possibleInvls.push(intervals)
+      possibleInvls.push(intervals)
 
+      if (chordTypes) {
+        chordTypes.forEach((type) => {
+          const name = _pitchClassName(root, useFlatNotation)
           possibleChords.push(`${name}${type}`)
         })
       }
