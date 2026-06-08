@@ -70,6 +70,8 @@ function currentChord(newChord: ChordName[]): void {
       </div>
     </div>
   </main>
+
+  <footer id="footer-neb-host">site by <a href="https://neb.host">neb.host</a></footer>
 </template>
 
 <style scoped>
@@ -91,5 +93,24 @@ main {
   header {
     place-items: center;
   }
+}
+
+footer {
+  background: var(--vt-c-black-softer);
+  border-top: 2px solid var(--vt-c-black-true);
+  bottom: 0;
+  color: var(--vt-c-white);
+  font-family: 'Consolas', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  height: 40px;
+  left: 0;
+  letter-spacing: initial;
+  margin-top: 20px;
+  padding: 10px 18px;
+  position: absolute;
+  right: 0;
+  text-align: left;
+  z-index: 2;
 }
 </style>
