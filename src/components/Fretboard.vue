@@ -454,13 +454,50 @@ function playChord(fretIds: string[]): void {
     index++
   })
 }
+
+function resetFrets(): void {
+  const strings: string[] = ['6', '5', '4', '3', '2', '1']
+
+  strings.forEach((stringId: string) => {
+    const stringFretsPressed: NodeList | null = getFretsPressed(stringId)
+
+    // remove all other pressed notes
+    if (stringFretsPressed && stringFretsPressed.length) {
+      stringFretsPressed.forEach((fret: Node) => {
+        if (fret instanceof HTMLElement) {
+          fret.dataset.pressed = 'false'
+          fret.classList.remove('pressed')
+          fretsPressed.value = fretsPressed.value.filter(
+            (fretPressed) => fretPressed != fret.dataset.fretId,
+          )
+          if (!fret.classList.contains('open')) {
+            fret.classList.add('empty')
+          }
+
+          fret.innerHTML = ''
+        }
+      })
+    }
+  })
+
+  emit('currentFrets', [])
+  emit('currentMidis', [])
+  emit('currentNotes', [])
+  emit('currentInvls', [])
+  emit('currentChord', [])
+}
 </script>
 
 <template>
-  <div id="play-chord">
-    <button @click="playChord(fretsPressed)" :disabled="fretsPressed.length < 2">
-      Strum Notes
-    </button>
+  <div id="buttons">
+    <div id="play-chord">
+      <button @click="playChord(fretsPressed)" :disabled="fretsPressed.length < 2">
+        Strum Notes
+      </button>
+    </div>
+    <div id="reset-notes">
+      <button @click="resetFrets" :disabled="!fretsPressed.length">Reset Frets</button>
+    </div>
   </div>
 
   <div id="fretboard-viewport">
@@ -1542,9 +1579,9 @@ function playChord(fretIds: string[]): void {
 </template>
 
 <style scoped>
-#play-chord {
-  align-items: flex-start;
+#buttons {
   display: flex;
+  gap: 5px;
   justify-content: center;
   padding-bottom: 1em;
 }
