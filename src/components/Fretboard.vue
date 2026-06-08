@@ -380,7 +380,10 @@ function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
       }
     }
 
-    emit('currentInvls', possibleInvls)
+    emit(
+      'currentInvls',
+      possibleInvls.map((invl) => invl.join(',')),
+    )
 
     return possibleChords
   } else {
