@@ -108,7 +108,7 @@ footer {
   letter-spacing: initial;
   margin: 20px 0 0;
   padding: 0 10px;
-  position: sticky;
+  position: fixed;
   right: 0;
   text-align: left;
   width: 100vw;
