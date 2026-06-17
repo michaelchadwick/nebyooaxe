@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Header from './components/Header.vue'
 import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
 
@@ -38,9 +39,7 @@ function currentChord(newChord: ChordName[]): void {
 </script>
 
 <template>
-  <header>
-    <h1>Nebyoo<strong>Axe</strong></h1>
-  </header>
+  <Header />
 
   <main>
     <Fretboard
@@ -70,8 +69,6 @@ function currentChord(newChord: ChordName[]): void {
       </div>
     </div>
   </main>
-
-  <footer id="footer-neb-host">site by <a href="https://neb.host">neb.host</a></footer>
 </template>
 
 <style scoped>
@@ -86,7 +83,10 @@ header {
 }
 
 main {
+  display: block;
   line-height: 1.5;
+  margin-top: 50px;
+  z-index: 1;
 }
 
 #note-stats {
