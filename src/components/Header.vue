@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import axios from 'axios'
+import { useModal } from '@/composables/useModal'
+import Modal from '@/components/Modal.vue'
 
 interface Site {
   title: string
@@ -27,6 +29,15 @@ async function fetchSites() {
   } finally {
     loading.value = false
   }
+}
+
+const helpModal = useModal()
+
+function showHelpModal() {
+  helpModal.open(
+    'Welcome to Axe',
+    'Toggle on some frets on the simplistic fretboard, and some stats will be displayed below. If you toggle certain ones, you will get a chord!',
+  )
 }
 
 onMounted(fetchSites)
@@ -79,11 +90,9 @@ onMounted(fetchSites)
         </div>
       </div>
 
-      <!--
-      <button id="button-help" class="icon" aria-label="Help" tabindex="-1">
+      <button @click="showHelpModal" id="button-help" class="icon" aria-label="Help" tabindex="-1">
         <font-awesome-icon icon="fa-solid fa-question" />
       </button>
-      -->
     </div>
 
     <div class="title">
@@ -98,6 +107,8 @@ onMounted(fetchSites)
       -->
     </div>
   </header>
+
+  <Modal />
 </template>
 
 <style scoped>
@@ -132,6 +143,7 @@ header {
 header .menu-left {
   align-items: center;
   display: flex;
+  gap: 5px;
   justify-content: flex-start;
   margin: 0;
   padding: 0;
@@ -262,5 +274,11 @@ header .menu-right button#button-settings {
   display: flex;
   justify-content: flex-end;
   margin-right: 0;
+}
+.modal-footer {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
 }
 </style>
