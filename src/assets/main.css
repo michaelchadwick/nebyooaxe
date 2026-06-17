@@ -15,33 +15,23 @@
   @media (min-width: 768px) {
     justify-content: center;
   }
-}
 
-a,
-.green {
-  color: var(--vt-c-white);
-  transition: 0.4s;
-  padding: 1px;
-}
-
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(73, 100%, 37%, 0.417);
-  }
-}
-
-@media (min-width: 1440px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
+  @media (min-width: 1440px) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     max-width: 1920px;
     padding: 0 2rem;
   }
+}
+
+a {
+  color: var(--vt-c-black);
+  transition: 0.4s;
+  padding: 1px;
+}
+
+p.buffered {
+  padding: 15px 0 0;
 }
 
 /*
