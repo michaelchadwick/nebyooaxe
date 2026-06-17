@@ -118,9 +118,15 @@ header {
 
   button {
     align-items: center;
-    background-color: var(--header-button-color);
+    background-color: var(--vt-c-beige);
     display: flex;
     height: 40px;
+
+    @media (hover: hover) {
+      &:hover {
+        background-color: var(--vt-c-beige-light);
+      }
+    }
   }
 }
 header .menu-left {

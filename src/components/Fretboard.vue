@@ -1663,7 +1663,6 @@ function emitEmpties(): void {
 
     .fret {
       align-items: center;
-
       border-right: 2px solid var(--vt-c-black-true);
       display: flex;
       justify-content: center;
@@ -1694,7 +1693,7 @@ function emitEmpties(): void {
 
       &.pressed,
       &.pressed:hover {
-        background: var(--vt-c-green-light);
+        background: var(--vt-c-green);
         border-right: 2px solid var(--vt-c-green-dark);
         border: none;
 

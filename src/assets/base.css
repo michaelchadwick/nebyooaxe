@@ -27,9 +27,12 @@
 
   --vt-c-orange: #ffa500;
 
-  --vt-c-green: #51bb41;
+  --vt-c-beige: #dbca9a;
+  --vt-c-beige-light: #eeddae;
+
+  --vt-c-green: #8edf82;
   --vt-c-green-dark: #299519;
-  --vt-c-green-light: #8edf82;
+  --vt-c-green-light: #9ef690;
   --vt-c-yellow: #fff3a5;
 
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
