@@ -1,11 +1,15 @@
 // src/composables/useModal.ts
-import { openModal as _open, closeModal as _close } from '@/stores/modal'
+import { computed } from 'vue'
+import { useModalStore } from '@/stores/modal'
 
 export function useModal() {
+  const store = useModalStore()
   return {
-    /** Show the modal with the given title / body text */
-    open: (title: string, body: string) => _open(title, body),
-    /** Hide it again */
-    close: _close,
+    openText: (opts: { title: string; html: string }) => store.openText(opts),
+
+    openComp: (comp: unknown, props?: Record<string, unknown>) => store.openComponent(comp, props),
+
+    close: () => store.close(),
+    isOpen: computed(() => store.isOpen),
   }
 }

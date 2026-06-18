@@ -2,6 +2,7 @@
 import Header from './components/Header.vue'
 import Fretboard from './components/Fretboard.vue'
 import { ref } from 'vue'
+import Modal from '@/components/Modal.vue'
 
 const appKey = ref(0)
 
@@ -69,6 +70,8 @@ function currentChord(newChord: ChordName[]): void {
       </div>
     </div>
   </main>
+
+  <Modal />
 </template>
 
 <style scoped>

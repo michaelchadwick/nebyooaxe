@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useSettingsStore } from '@/stores/settings'
 
+const settings = useSettingsStore()
 const ctx = new window.AudioContext()
 const fretsPressed = ref<string[]>([])
 
@@ -287,9 +289,11 @@ function toggleFret(event: PointerEvent): void {
             }
           }
 
-          // play note
-          if (fretId) {
-            playNote(fretId)
+          // play note, if sound enabled
+          if (settings.enableFretSound) {
+            if (fretId) {
+              playNote(fretId)
+            }
           }
         }
       }

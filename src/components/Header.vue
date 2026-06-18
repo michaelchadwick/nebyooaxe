@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue'
 import axios from 'axios'
+import { onMounted, ref } from 'vue'
 import { useModal } from '@/composables/useModal'
-import Modal from '@/components/Modal.vue'
+import SettingsForm from '@/components/SettingsForm.vue'
 
 interface Site {
   title: string
@@ -31,17 +31,21 @@ async function fetchSites() {
   }
 }
 
-const helpModal = useModal()
+const modal = useModal()
 
-function showHelpModal() {
-  helpModal.open(
-    'Welcome to Axe',
-    `
-    <p>Toggle some frets on the fretboard, and some stats will be displayed below. Press the "Strum Notes" button to play them. If you toggle certain frets, you may get a chord!</p>
+function showHelp() {
+  modal.openText({
+    title: 'Welcome to Axe',
+    html: `
+      <p>Toggle some frets on the fretboard, and some stats will be displayed below. Press the "Strum Notes" button to play them. If you toggle certain frets, you may get a chord!</p>
 
-    <p class="buffered">Site by <a href="https://michaelchadwick.info">Michael Chadwick</a> | <a href="https://github.com/michaelchadwick/nebyooaxe">Source code</a></p>
+      <p class="buffered">Site by <a href="https://michaelchadwick.info">Michael Chadwick</a> | <a href="https://github.com/michaelchadwick/nebyooaxe">Source code</a></p>
     `,
-  )
+  })
+}
+
+function showSettings() {
+  modal.openComp(SettingsForm)
 }
 
 onMounted(fetchSites)
@@ -94,7 +98,7 @@ onMounted(fetchSites)
         </div>
       </div>
 
-      <button @click="showHelpModal" id="button-help" class="icon" aria-label="Help" tabindex="-1">
+      <button @click="showHelp" id="button-help" class="icon" aria-label="Help" tabindex="-1">
         <font-awesome-icon icon="fa-solid fa-question" />
       </button>
     </div>
@@ -104,15 +108,17 @@ onMounted(fetchSites)
     </div>
 
     <div class="menu-right">
-      <!--
-      <button id="button-settings" class="icon" aria-label="Settings" tabindex="-1">
+      <button
+        @click="showSettings"
+        id="button-settings"
+        class="icon"
+        aria-label="Settings"
+        tabindex="-1"
+      >
         <font-awesome-icon icon="fa-solid fa-gear" />
       </button>
-      -->
     </div>
   </header>
-
-  <Modal />
 </template>
 
 <style scoped>
