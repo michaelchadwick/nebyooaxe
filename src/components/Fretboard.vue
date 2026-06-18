@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 
 const settings = useSettingsStore()
@@ -241,106 +241,87 @@ function getStringFretsPressed(stringId: string): NodeList | null {
 // try to decipher chord(s)
 function toggleFret(event: PointerEvent): void {
   if (event.target instanceof HTMLElement) {
-    let elem
-
-    if (event.target.tagName == 'HR') {
-      elem = event.target.parentElement
-    } else {
-      elem = event.target
-    }
+    let elem = event.target
 
     if (elem) {
-      const stringId: string | undefined = elem.parentElement?.dataset.stringId
-      const fretId: string | undefined = elem.dataset.fretId
-      const classes = elem.classList
-      const dataset = elem.dataset
+      elem.dataset?.pressed == 'false' ? toggleNoteOn(elem) : toggleNoteOff(elem)
+    }
 
-      // toggle from unpressed to pressed: add note-bubble
-      if (dataset?.pressed == 'false') {
-        if (stringId) {
-          const stringFretsPressed: NodeList | null = getStringFretsPressed(stringId)
+    emitNoteStatUpdates()
+  }
+}
 
-          // remove all other pressed notes
-          if (stringFretsPressed && stringFretsPressed.length) {
-            stringFretsPressed.forEach((fret: Node) => {
-              if (fret instanceof HTMLElement) {
-                fret.dataset.pressed = 'false'
-                fret.classList.remove('pressed')
-                fretsPressed.value = fretsPressed.value.filter(
-                  (fretPressed) => fretPressed != fret.dataset.fretId,
-                )
-                if (!fret.classList.contains('open')) {
-                  fret.classList.add('empty')
-                }
+// toggle from unpressed to pressed: add note-bubble
+function toggleNoteOn(elem: HTMLElement) {
+  const stringId: string | undefined = elem.parentElement?.dataset.stringId
+  const fretId: string | undefined = elem.dataset.fretId
+  const classes = elem.classList
+  const dataset = elem.dataset
 
-                fret.innerHTML = ''
-              }
-            })
-          }
-          dataset.pressed = 'true'
-          classes?.remove('empty')
-          classes?.add('pressed', 'note-bubble')
-          fretsPressed.value = [...fretsPressed.value, fretId ?? '']
+  if (stringId && fretId) {
+    const stringFretsPressed: NodeList | null = getStringFretsPressed(stringId)
 
-          if (stringId !== undefined && fretId !== undefined) {
-            const noteIndex = Number(fretId.slice(2)) % 12
-            if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
-              elem.innerHTML = FRET_NOTE[stringId][noteIndex]
-            }
+    // remove all other pressed notes
+    if (stringFretsPressed && stringFretsPressed.length) {
+      stringFretsPressed.forEach((fret: Node) => {
+        if (fret instanceof HTMLElement) {
+          fret.dataset.pressed = 'false'
+          fret.classList.remove('pressed')
+          fretsPressed.value = fretsPressed.value.filter(
+            (fretPressed) => fretPressed != fret.dataset.fretId,
+          )
+          if (!fret.classList.contains('open')) {
+            fret.classList.add('empty')
           }
 
-          // play note, if sound enabled
-          if (settings.enableFretSound) {
-            if (fretId) {
-              playNote(fretId)
-            }
-          }
+          fret.innerHTML = ''
         }
-      }
-      // toggle from pressed to unpressed: remove note-bubble
-      else {
-        if (dataset !== undefined) {
-          dataset.pressed = 'false'
-        }
-        classes?.remove('pressed', 'note-bubble')
-        fretsPressed.value = fretsPressed.value.filter((fret) => fret != fretId)
+      })
+    }
+    dataset.pressed = 'true'
+    classes?.remove('empty')
+    classes?.add('pressed', 'note-bubble')
+    fretsPressed.value = [...fretsPressed.value, fretId ?? '']
 
-        if (!classes.contains('open')) {
-          classes.add('empty')
-        }
-        elem.innerHTML = ''
-
-        // if there are no more frets pressed, make sure to reset ref objects
-        if (!fretsPressed.value.length) {
-          emitEmpties()
-        }
+    if (stringId !== undefined && fretId !== undefined) {
+      const noteIndex = Number(fretId.slice(2)) % 12
+      if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
+        elem.innerHTML = FRET_NOTE[stringId][noteIndex]
       }
     }
 
-    const sortedFrets: FretArray = fretsPressed.value ? [...fretsPressed.value].sort() : []
-    emit('currentFrets', sortedFrets)
-
-    const noteArray: NoteArray = getNotes()
-
-    const unsortedMidis: MidiArray = noteArray.map((note) => note.midi)
-    const sortedMidis: MidiArray = unsortedMidis
-      .filter((x): x is number => typeof x === 'number')
-      .sort()
-    emit('currentMidis', sortedMidis)
-
-    function compareNotes(a: Note, b: Note): number {
-      return a.midi - b.midi
+    // play note, if sound enabled
+    if (settings.enableFretSound) {
+      if (fretId) {
+        playNote(fretId)
+      }
     }
-    const noteNames: string[] = noteArray
-      .sort(compareNotes)
-      .map((note) => note.name)
-      .filter((x): x is string => !!x)
-    emit('currentNotes', noteNames)
+  }
+}
 
-    let midiNumberArray: MidiArray = Array.from(
-      new Set(noteArray.map((note: Note) => note.midi)),
-    ).sort()
-    emit('currentChord', getChord(midiNumberArray))
+// toggle from pressed to unpressed: remove note-bubble
+function toggleNoteOff(elem: HTMLElement) {
+  const stringId: string | undefined = elem.parentElement?.dataset.stringId
+  const fretId: string | undefined = elem.dataset.fretId
+  const classes = elem.classList
+  const dataset = elem.dataset
+
+  if (stringId && fretId) {
+    if (dataset !== undefined) {
+      dataset.pressed = 'false'
+    }
+    classes?.remove('pressed', 'note-bubble')
+    fretsPressed.value = fretsPressed.value.filter((fret) => fret != fretId)
+
+    if (!classes.contains('open')) {
+      classes.add('empty')
+    }
+    elem.innerHTML = ''
+
+    // if there are no more frets pressed, make sure to reset ref objects
+    if (!fretsPressed.value.length) {
+      emitEmpties()
+    }
   }
 }
 
@@ -495,6 +476,34 @@ function resetFrets(): void {
   emitEmpties()
 }
 
+function emitNoteStatUpdates(): void {
+  const sortedFrets: FretArray = fretsPressed.value ? [...fretsPressed.value].sort() : []
+  settings.currentFrets = sortedFrets
+  emit('currentFrets', sortedFrets)
+
+  const noteArray: NoteArray = getNotes()
+
+  const unsortedMidis: MidiArray = noteArray.map((note) => note.midi)
+  const sortedMidis: MidiArray = unsortedMidis
+    .filter((x): x is number => typeof x === 'number')
+    .sort()
+  emit('currentMidis', sortedMidis)
+
+  function compareNotes(a: Note, b: Note): number {
+    return a.midi - b.midi
+  }
+  const noteNames: string[] = noteArray
+    .sort(compareNotes)
+    .map((note) => note.name)
+    .filter((x): x is string => !!x)
+  emit('currentNotes', noteNames)
+
+  let midiNumberArray: MidiArray = Array.from(
+    new Set(noteArray.map((note: Note) => note.midi)),
+  ).sort()
+  emit('currentChord', getChord(midiNumberArray))
+}
+
 // reset all debug collections
 function emitEmpties(): void {
   emit('currentFrets', [])
@@ -502,7 +511,41 @@ function emitEmpties(): void {
   emit('currentNotes', [])
   emit('currentInvls', [])
   emit('currentChord', [])
+
+  settings.currentFrets = []
 }
+
+function loadFrets() {
+  if (settings.currentFrets) {
+    const frets: NodeList = document.querySelectorAll(`.fret`)
+
+    frets.forEach((fret: Node) => {
+      if (fret instanceof HTMLElement && fret.dataset.fretId) {
+        if (settings.currentFrets.includes(fret.dataset.fretId)) {
+          const stringId = fret.parentElement?.dataset.stringId
+          const fretId = fret.dataset.fretId
+
+          fret.dataset.pressed = 'true'
+          fret.classList.remove('empty')
+          fret.classList.add('pressed', 'note-bubble')
+          fretsPressed.value = [...fretsPressed.value, fretId ?? '']
+
+          const noteIndex = Number(fretId.slice(2)) % 12
+
+          if (stringId !== undefined && fretId !== undefined) {
+            if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
+              fret.innerHTML = FRET_NOTE[stringId][noteIndex]
+            }
+          }
+        }
+      }
+    })
+
+    emitNoteStatUpdates()
+  }
+}
+
+onMounted(loadFrets)
 </script>
 
 <template>

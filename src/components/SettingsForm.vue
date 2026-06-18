@@ -3,8 +3,8 @@
 import { useSettingsStore } from '@/stores/settings'
 
 const settings = useSettingsStore()
-function toggle() {
-  settings.toggle('enableFretSound')
+function update() {
+  settings.toggleEnableFretSound()
 }
 </script>
 
@@ -12,7 +12,7 @@ function toggle() {
   <h2>Axe Settings</h2>
   <div class="settings-form">
     <label>
-      <input type="checkbox" :checked="settings.enableFretSound" @change="toggle" />
+      <input type="checkbox" :checked="settings.enableFretSound" @change="update" />
       <span>Enable fret sound</span>
     </label>
   </div>
