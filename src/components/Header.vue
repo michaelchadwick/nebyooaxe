@@ -58,7 +58,7 @@ onMounted(fetchSites)
           aria-label="Click for links to more apps by neb.host"
           tabindex="-1"
         >
-          <img src="../assets/the_n_bw.svg" alt="" />
+          <img src="../assets/images/the_n_bw.svg" alt="" />
         </button>
         <div id="nav-overlay" :class="{ show: showApps }">
           <div id="nav-content">
