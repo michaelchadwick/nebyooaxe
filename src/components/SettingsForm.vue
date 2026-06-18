@@ -13,7 +13,7 @@ function toggle() {
   <div class="settings-form">
     <label>
       <input type="checkbox" :checked="settings.enableFretSound" @change="toggle" />
-      Enable fret sound
+      <span>Enable fret sound</span>
     </label>
   </div>
 </template>
