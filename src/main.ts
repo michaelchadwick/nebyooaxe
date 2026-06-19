@@ -2,7 +2,6 @@ import './assets/css/main.css'
 
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import piniaPersist from 'pinia-plugin-persistedstate'
 import App from './App.vue'
 
 import { library } from '@fortawesome/fontawesome-svg-core'
@@ -11,7 +10,7 @@ import { faGear, faQuestion } from '@fortawesome/free-solid-svg-icons'
 
 library.add(faGear, faQuestion)
 
-const pinia = createPinia()
-pinia.use(piniaPersist)
+const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon)
 
-createApp(App).component('font-awesome-icon', FontAwesomeIcon).use(pinia).mount('#app')
+app.use(createPinia())
+app.mount('#app')

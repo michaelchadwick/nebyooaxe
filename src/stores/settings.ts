@@ -1,20 +1,19 @@
 // src/stores/settings.ts
 import { defineStore } from 'pinia'
+import { useStorage } from '@vueuse/core'
 
 type FretArray = string[]
 
 export const useSettingsStore = defineStore('nebyooaxe-settings', {
-  persist: true,
   state: () => ({
-    enableFretSound: true,
-    currentFrets: <string[]>[],
+    enableFretSound: useStorage('enableFretSound', true),
+    currentFrets: useStorage('currentFrets', <string[]>[]),
   }),
   actions: {
     toggleEnableFretSound() {
       this.enableFretSound = !this.enableFretSound
     },
     updateCurrentFrets(currentFrets: FretArray) {
-      console.log('currentFrets', currentFrets)
       this.currentFrets = currentFrets
     },
   },
