@@ -38,6 +38,18 @@ function currentInvls(newInvls: IntervalsArray): void {
 function currentChord(newChord: ChordName[]): void {
   chord.value = newChord.join(', ')
 }
+
+onMounted(() => {
+  console.log('loaded App.vue')
+
+  const env = ['axe.neb.host', 'neb.host'].includes(document.location.hostname) ? 'prod' : 'local'
+
+  if (env == 'local') {
+    if (!document.title.includes('(LH)')) {
+      document.title = '(LH) ' + document.title
+    }
+  }
+})
 </script>
 
 <template>
