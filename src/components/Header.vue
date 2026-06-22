@@ -100,9 +100,11 @@ onMounted(fetchSites)
         </div>
       </div>
 
+      <!-- TODO: Clicking on these fails on production due to some circular JSON.stringify issue with axios
       <button @click="showHelp" id="button-help" class="icon" aria-label="Help" tabindex="-1">
         <font-awesome-icon icon="fa-solid fa-question" />
       </button>
+      -->
     </div>
 
     <div class="title">
@@ -110,6 +112,7 @@ onMounted(fetchSites)
     </div>
 
     <div class="menu-right">
+      <!-- TODO: Clicking on these fails on production due to some circular JSON.stringify issue with axios
       <button
         @click="showSettings"
         id="button-settings"
@@ -119,6 +122,7 @@ onMounted(fetchSites)
       >
         <font-awesome-icon icon="fa-solid fa-gear" />
       </button>
+      -->
     </div>
   </header>
 </template>
