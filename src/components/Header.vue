@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import axios from 'axios'
-import { onMounted, ref } from 'vue'
+import { inject, onMounted, ref } from 'vue'
 import { useModal } from '@/composables/useModal'
 import SettingsForm from '@/components/SettingsForm.vue'
+import type { AxiosInstance } from 'axios'
+
+const http = inject('http') as unknown as AxiosInstance
 
 interface Site {
   title: string
@@ -21,7 +23,7 @@ const toggleApps = () => {
 async function fetchSites() {
   try {
     const NEBYOOAPPS_SOURCE_URL = 'https://dave.neb.host/?sites'
-    const response = await axios.get(NEBYOOAPPS_SOURCE_URL)
+    const response = await http!.get(NEBYOOAPPS_SOURCE_URL)
 
     sites.value = response.data.body
   } catch (e: any) {
