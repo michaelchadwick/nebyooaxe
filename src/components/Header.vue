@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { inject, onMounted, ref } from 'vue'
+import { inject, markRaw, onMounted, ref } from 'vue'
 import { useModal } from '@/composables/useModal'
 import SettingsForm from '@/components/SettingsForm.vue'
 import type { AxiosInstance } from 'axios'
@@ -47,7 +47,7 @@ function showHelp() {
 }
 
 function showSettings() {
-  modal.openComp(SettingsForm)
+  modal.openComp(markRaw(SettingsForm))
 }
 
 onMounted(fetchSites)
