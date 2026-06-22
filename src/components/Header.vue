@@ -271,6 +271,7 @@ header {
 
   .menu-right {
     display: flex;
+    justify-content: flex-end;
     width: 70px;
 
     button#button-settings {
