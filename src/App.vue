@@ -40,8 +40,6 @@ function currentChord(newChord: ChordName[]): void {
 }
 
 onMounted(() => {
-  console.log('loaded App.vue')
-
   const env = ['axe.neb.host', 'neb.host'].includes(document.location.hostname) ? 'prod' : 'local'
 
   if (env == 'local') {
