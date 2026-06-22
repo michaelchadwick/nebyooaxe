@@ -9,12 +9,14 @@ function update() {
 </script>
 
 <template>
-  <h2>Axe Settings</h2>
-  <div class="settings-form">
-    <label>
-      <input type="checkbox" :checked="settings.enableFretSound" @change="update" />
-      <span>Enable fret sound</span>
-    </label>
+  <div>
+    <h2>Axe Settings</h2>
+    <div class="settings-form">
+      <label>
+        <input type="checkbox" :checked="settings.enableFretSound" @change="update" />
+        <span>Enable fret sound</span>
+      </label>
+    </div>
   </div>
 </template>
 
