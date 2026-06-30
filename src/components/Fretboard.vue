@@ -1719,6 +1719,7 @@ onMounted(loadFrets)
       padding: 0;
       position: relative;
       height: 1.75rem;
+      transition: all 100ms;
       width: 1.75rem;
 
       &.empty::after {
@@ -1753,7 +1754,7 @@ onMounted(loadFrets)
           border-radius: 16px;
           color: var(--vt-c-black);
           height: 28px;
-          transition: all 200ms;
+          transition: all 100ms;
           width: 28px;
           z-index: 10;
 
