@@ -429,12 +429,15 @@ function playNote(fretId: string): void {
   osc.connect(masterGainNode)
   masterGainNode.connect(ctx.destination)
 
+  const fretElement = document.querySelector(`[data-fret-id="${fretId}"]`)
+  fretElement?.classList.add('playing')
   osc.start(ctx.currentTime)
   masterGainNode.gain.exponentialRampToValueAtTime(endGain, ctx.currentTime + 0.2)
 
   masterGainNode.gain.exponentialRampToValueAtTime(startGain, ctx.currentTime + 2.1)
   osc.stop(ctx.currentTime + 2.1)
   lfo.stop(ctx.currentTime + 2.1)
+  setTimeout(() => fretElement?.classList.remove('playing'), 200)
 }
 function playChord(fretIds: string[]): void {
   if (fretIds[0]) {
@@ -1740,7 +1743,7 @@ onMounted(loadFrets)
 
       &.pressed,
       &.pressed:hover {
-        background: var(--vt-c-green);
+        background-color: var(--vt-c-green);
         border-right: 2px solid var(--vt-c-green-dark);
         border: none;
 
@@ -1749,11 +1752,18 @@ onMounted(loadFrets)
           border-right: 2px solid var(--vt-c-black);
           border-radius: 16px;
           color: var(--vt-c-black);
+          height: 28px;
+          transition: all 200ms;
+          width: 28px;
           z-index: 10;
+
+          &.playing {
+            background-color: var(--vt-c-orange);
+          }
 
           @media (hover: hover) {
             &:hover {
-              background: var(--vt-c-yellow);
+              background-color: var(--vt-c-yellow);
               border-color: var(--vt-c-yellow);
               border-right: 2px solid var(--vt-c-black);
             }
