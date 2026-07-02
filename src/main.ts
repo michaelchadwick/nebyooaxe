@@ -12,7 +12,8 @@ import { faGear, faQuestion } from '@fortawesome/free-solid-svg-icons'
 library.add(faGear, faQuestion)
 
 const app = createApp(App).component('font-awesome-icon', FontAwesomeIcon)
+const pinia = createPinia()
 
-app.use(createPinia())
+app.use(pinia)
 app.use(axiosCustomPlugin)
 app.mount('#app')
