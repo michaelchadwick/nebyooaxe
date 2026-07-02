@@ -16,6 +16,9 @@ export default defineConfig({
 
         warn(warning)
       },
+      output: {
+        minify: true,
+      },
     },
   },
   plugins: [vue(), vueDevTools()],
