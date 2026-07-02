@@ -11,10 +11,10 @@ export const useModalStore = defineStore('modal', () => {
   const componentProps: Ref<Record<string, unknown>> = ref({})
 
   function openText(opts: { title: string; html: string }) {
-    title.value = opts.title
-    html.value = opts.html
     component.value = null
     componentProps.value = {}
+    title.value = opts.title
+    html.value = opts.html
     isOpen.value = true
   }
 
@@ -27,11 +27,11 @@ export const useModalStore = defineStore('modal', () => {
   }
 
   function close() {
-    isOpen.value = false
-    title.value = null
-    html.value = null
     component.value = null
     componentProps.value = {}
+    title.value = null
+    html.value = null
+    isOpen.value = false
   }
 
   return { isOpen, title, html, component, componentProps, openText, openComponent, close }
