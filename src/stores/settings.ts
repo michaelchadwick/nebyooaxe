@@ -6,8 +6,8 @@ type FretArray = string[]
 
 export const useSettingsStore = defineStore('nebyooaxe-settings', {
   state: () => ({
-    enableFretSound: useStorage('enableFretSound', true),
-    currentFrets: useStorage('currentFrets', <string[]>[]),
+    enableFretSound: useStorage('axe-enable-fretSound', true),
+    currentFrets: useStorage('axe-current-frets', <string[]>[]),
   }),
   actions: {
     toggleEnableFretSound() {
