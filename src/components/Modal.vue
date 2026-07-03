@@ -4,14 +4,11 @@ import { Teleport } from 'vue'
 import { useModalStore } from '@/stores/modal'
 
 const modal = useModalStore()
-function close() {
-  modal.close()
-}
 </script>
 
 <template>
   <Teleport to="body" v-if="modal.isOpen">
-    <div class="overlay" @click.self="close">
+    <div class="overlay" @click.self="modal.close">
       <div class="dialog" role="dialog" aria-modal="true">
         <h2 v-if="modal.title">{{ modal.title }}</h2>
         <div v-if="modal.html" v-html="modal.html" class="content"></div>
@@ -21,11 +18,11 @@ function close() {
           v-else-if="modal.component"
           :is="modal.component"
           v-bind="modal.componentProps"
-          @close="close"
+          @close="modal.close"
           class="content"
         />
 
-        <button class="close-btn" @click="close">Close</button>
+        <button class="close-btn" @click="modal.close">Close</button>
       </div>
     </div>
   </Teleport>
