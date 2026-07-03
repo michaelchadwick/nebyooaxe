@@ -4,11 +4,11 @@ import type { Ref } from 'vue'
 import { ref } from 'vue'
 
 export const useModalStore = defineStore('modal', () => {
-  const isOpen: Ref<boolean> = ref(false)
-  const title: Ref<string | null> = ref(null)
-  const html: Ref<string | null> = ref(null)
   const component: Ref<unknown | null> = ref(null)
   const componentProps: Ref<Record<string, unknown>> = ref({})
+  const title: Ref<string | null> = ref(null)
+  const html: Ref<string | null> = ref(null)
+  const isOpen: Ref<boolean> = ref(false)
 
   function openText(opts: { title: string; html: string }) {
     component.value = null
@@ -34,5 +34,7 @@ export const useModalStore = defineStore('modal', () => {
     isOpen.value = false
   }
 
-  return { isOpen, title, html, component, componentProps, openText, openComponent, close }
+  const store = { isOpen, title, html, component, componentProps, openText, openComponent, close }
+
+  return store
 })
