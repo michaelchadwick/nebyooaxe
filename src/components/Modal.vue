@@ -11,7 +11,6 @@ function close() {
 
 <template>
   <Teleport to="body" v-if="modal.isOpen">
-    {{ modal }}
     <div class="overlay" @click.self="close">
       <div class="dialog" role="dialog" aria-modal="true">
         <h2 v-if="modal.title">{{ modal.title }}</h2>
