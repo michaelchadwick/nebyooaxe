@@ -62,8 +62,8 @@
   --section-gap: 160px;
 
   --base-color: #3e484d;
-  --header-color: #d7c7c0;
-  --header-button-color: #e8c4b5;
+  --header-color: var(--vt-c-white-soft);
+  --header-button-color: var(--vt-c-white);
 }
 
 @media (prefers-color-scheme: dark) {

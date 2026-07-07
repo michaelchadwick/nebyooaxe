@@ -141,7 +141,7 @@ header {
 
   button {
     align-items: center;
-    background-color: var(--vt-c-beige);
+    background-color: var(--header-button-color);
     display: flex;
     height: 40px;
 
