@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { mount } from '@vue/test-utils'
 import Fretboard from '../Fretboard.vue'
@@ -13,11 +13,12 @@ describe('Fretboard', () => {
 
   it('renders properly', () => {
     const wrapper = mount(Fretboard)
+    const buttonsText = 'Strum NotesReset Frets'
     const fretNumbers = Array(25)
       .fill(0)
       .map((_, i) => i.toString())
       .join('')
-    const fretNotes = 'EBGDAE'
-    expect(wrapper.text()).toEqual(fretNumbers + fretNotes)
+    const fretNotes = 'E4B3G3D3A2E2'
+    expect(wrapper.text()).toEqual(buttonsText + fretNumbers + fretNotes)
   })
 })
