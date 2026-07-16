@@ -1,4 +1,2 @@
 allowBuilds:
   esbuild: true
-patchedDependencies:
-  '@fortawesome/vue-fontawesome': patches/@fortawesome__vue-fontawesome.patch
