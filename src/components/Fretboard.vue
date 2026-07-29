@@ -372,7 +372,7 @@ function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
 
     return possibleChords
   } else {
-    return ['(Need at least 3 notes)']
+    return ['(Need at least 2 notes)']
   }
 }
 
