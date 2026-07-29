@@ -370,6 +370,11 @@ function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
       possibleInvls.map((invl) => invl.join(',')),
     )
 
+    if (!possibleChords.length) {
+      const lowestNote = _pitchClassName(_midiToPitchClass(midiNums[0]), useFlatNotation)
+      return [`(Unidentified ${lowestNote} ${midiNums.length == 2 ? 'interval' : 'chord'})`]
+    }
+
     return possibleChords
   } else {
     return ['(Need at least 2 notes)']
