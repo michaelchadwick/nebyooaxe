@@ -41,6 +41,8 @@ function showHelp() {
     html: `
       <p>Toggle some frets on the fretboard, and some stats will be displayed below. Press the "Strum Notes" button to play them. If you toggle certain frets, you may get a chord!</p>
 
+      <p class="buffered"><strong>Keyboard Shortcuts</strong>: <code>Space</code>: Strum Notes, <code>Escape</code>: Reset Frets</p>
+
       <p class="buffered">Site by <a href="https://michaelchadwick.info">Michael Chadwick</a> | <a href="https://github.com/michaelchadwick/nebyooaxe">Source code</a></p>
     `,
   })

@@ -524,7 +524,7 @@ function emitEmpties(): void {
   settings.currentFrets = []
 }
 
-function loadFrets() {
+async function loadFrets() {
   if (settings.currentFrets) {
     const frets: NodeList = document.querySelectorAll(`.fret`)
 
@@ -551,6 +551,23 @@ function loadFrets() {
     })
 
     emitNoteStatUpdates()
+    keyboardEventHandler()
+  }
+}
+
+function keyboardEventHandler(): void {
+  document.addEventListener('keyup', keyController)
+}
+function keyController(e: KeyboardEvent): void {
+  switch (e.code) {
+    case 'Space':
+      playChord(fretsPressed.value)
+      break
+    case 'Escape':
+      resetFrets()
+      break
+    default:
+      break
   }
 }
 
