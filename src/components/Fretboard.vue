@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
+import type { OscType } from '@/types'
 
 const settings = useSettingsStore()
 const ctx = new window.AudioContext()
@@ -228,6 +229,10 @@ const FRET_NOTE: Record<string, string[]> = {
   '1': ['E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B', 'C', 'C#', 'D', 'D#'],
 }
 
+function isOscType(v: any): v is OscType {
+  return ['sine', 'square', 'triangle', 'sawtooth'].includes(v)
+}
+
 function getStringFretsPressed(stringId: string): NodeList | null {
   const frets: NodeList = document.querySelectorAll(
     `.string[data-string-id="${stringId}"] .fret[data-pressed="true"]`,
@@ -408,7 +413,8 @@ function playNote(fretId: string): void {
 
   // main osc note
   const osc = ctx.createOscillator()
-  osc.type = 'square'
+  osc.type = isOscType(settings.fretSoundType) ? settings.fretSoundType : 'square'
+
   const noteFreq = MUSICAL_NOTES.filter((n) => n.fretIds.includes(fretId))[0]?.frequency
   if (noteFreq) {
     osc.frequency.value = noteFreq

@@ -1,10 +1,17 @@
 <!-- src/components/SettingsForm.vue -->
 <script setup lang="ts">
 import { useSettingsStore } from '@/stores/settings'
+import type { OscType } from '@/types'
 
 const settings = useSettingsStore()
-function update() {
+
+type OscillatorType = string
+
+function updateEnableFretSound() {
   settings.toggleEnableFretSound()
+}
+function updateFretSoundType(type: OscType) {
+  settings.updateFretSoundType(type)
 }
 </script>
 
@@ -13,8 +20,21 @@ function update() {
     <h2>Axe Settings</h2>
     <div class="settings-form">
       <label>
-        <input type="checkbox" :checked="settings.enableFretSound" @change="update" />
+        <input
+          type="checkbox"
+          :checked="settings.enableFretSound"
+          @change="updateEnableFretSound"
+        />
         <span>Enable fret sound</span>
+      </label>
+      <label>
+        Fret Sound
+        <select v-model="settings.fretSoundType">
+          <option value="sine">sine</option>
+          <option value="square">square</option>
+          <option value="sawtooth">sawtooth</option>
+          <option value="triangle">triangle</option>
+        </select>
       </label>
     </div>
   </div>
