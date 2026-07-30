@@ -2,7 +2,7 @@
 import { onMounted, ref } from 'vue'
 import { useSettingsStore } from '@/stores/settings'
 import Note from '@/note'
-import type { OscType } from '@/types'
+import type { OscType, StrumPattern } from '@/types'
 import {
   MUSICAL_NOTES,
   FRET_NOTE,
@@ -32,6 +32,9 @@ type ChordName = string
 
 function isOscType(v: any): v is OscType {
   return ['sine', 'square', 'triangle', 'sawtooth'].includes(v)
+}
+function isStrumPattern(v: any): v is StrumPattern {
+  return ['as-entered', 'bottom-up', 'top-down'].includes(v)
 }
 
 function getStringFretsPressed(stringId: string): NodeList | null {
@@ -253,12 +256,28 @@ function playNote(fretId: string): void {
   setTimeout(() => fretElement?.classList.remove('playing'), 200)
 }
 function playChord(fretIds: string[]): void {
-  if (fretIds[0]) {
-    playNote(fretIds[0])
+  let fretsToPlay: string[] = []
+
+  if (isStrumPattern(settings.strumPattern)) {
+    switch (settings.strumPattern) {
+      case 'bottom-up':
+        fretsToPlay = fretIds.sort()
+        break
+      case 'top-down':
+        fretsToPlay = fretIds.sort().reverse()
+        break
+      default:
+        fretsToPlay = fretIds
+        break
+    }
+  }
+
+  if (fretsToPlay[0]) {
+    playNote(fretsToPlay[0])
   }
   let delay = 50
   let index = 1
-  fretIds.slice(1).forEach((fretId) => {
+  fretsToPlay.slice(1).forEach((fretId) => {
     setTimeout(() => playNote(fretId), delay * index)
     index++
   })

@@ -1,7 +1,7 @@
 <!-- src/components/SettingsForm.vue -->
 <script setup lang="ts">
 import { useSettingsStore } from '@/stores/settings'
-import type { OscType } from '@/types'
+import type { OscType, StrumPattern } from '@/types'
 
 const settings = useSettingsStore()
 
@@ -12,6 +12,9 @@ function updateEnableFretSound() {
 }
 function updateFretSoundType(type: OscType) {
   settings.updateFretSoundType(type)
+}
+function updateStrumPattern(pattern: StrumPattern) {
+  settings.updateStrumPattern(pattern)
 }
 </script>
 
@@ -34,6 +37,14 @@ function updateFretSoundType(type: OscType) {
           <option value="square">square</option>
           <option value="sawtooth">sawtooth</option>
           <option value="triangle">triangle</option>
+        </select>
+      </label>
+      <label>
+        Strum Pattern
+        <select v-model="settings.strumPattern">
+          <option value="as-entered">as entered</option>
+          <option value="bottom-up">bottom up</option>
+          <option value="top-down">top down</option>
         </select>
       </label>
     </div>
