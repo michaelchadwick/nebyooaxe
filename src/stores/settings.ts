@@ -1,10 +1,9 @@
 // src/stores/settings.ts
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
+import type { OscType, StrumPattern } from '@/types'
 
 type FretArray = string[]
-type OscType = 'sine' | 'square' | 'triangle' | 'sawtooth'
-type StrumPattern = 'as-entered' | 'bottom-up' | 'top-down'
 
 export const useSettingsStore = defineStore('nebyooaxe-settings', {
   state: () => ({

@@ -1,20 +1,11 @@
 <!-- src/components/SettingsForm.vue -->
 <script setup lang="ts">
 import { useSettingsStore } from '@/stores/settings'
-import type { OscType, StrumPattern } from '@/types'
 
 const settings = useSettingsStore()
 
-type OscillatorType = string
-
 function updateEnableFretSound() {
   settings.toggleEnableFretSound()
-}
-function updateFretSoundType(type: OscType) {
-  settings.updateFretSoundType(type)
-}
-function updateStrumPattern(pattern: StrumPattern) {
-  settings.updateStrumPattern(pattern)
 }
 </script>
 
