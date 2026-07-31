@@ -119,7 +119,7 @@ function toggleNoteOff(elem: HTMLElement) {
     if (dataset !== undefined) {
       dataset.pressed = 'false'
     }
-    classes?.remove('pressed', 'note-bubble')
+    classes?.remove('pressed', 'pressed-hover', 'note-bubble')
     fretsPressed.value = fretsPressed.value.filter((fret) => fret != fretId)
 
     if (!classes.contains('open')) {
@@ -397,6 +397,37 @@ function keyController(e: KeyboardEvent): void {
   }
 }
 
+function mouseHandler(event: MouseEvent): void {
+  if (event.target instanceof HTMLElement) {
+    let elem = event.target
+    const type = event.type
+
+    if (elem) {
+      const stringId: string | undefined = elem.parentElement?.dataset.stringId
+      const fretId: string | undefined = elem.dataset.fretId
+      const classes = elem.classList
+      const pressed = elem.dataset?.pressed
+
+      if (type == 'mouseover') {
+        if (pressed == 'false') {
+          classes?.remove('empty')
+          classes?.add('pressed', 'pressed-hover', 'note-bubble')
+          fretsPressed.value = [...fretsPressed.value, fretId ?? '']
+
+          if (stringId !== undefined && fretId !== undefined) {
+            const noteIndex = Number(fretId.slice(2)) % 12
+            if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
+              elem.innerHTML = FRET_NOTE[stringId][noteIndex]
+            }
+          }
+        }
+      } else if (elem.dataset?.pressed == 'false') {
+        toggleNoteOff(elem)
+      }
+    }
+  }
+}
+
 onMounted(loadFrets)
 </script>
 
@@ -450,7 +481,7 @@ onMounted(loadFrets)
         <div data-string-note-id="1">E<sub>2</sub></div>
       </div>
 
-      <div id="strings">
+      <div id="strings" v-on:mouseover="mouseHandler" v-on:mouseout="mouseHandler">
         <div class="string" data-string-id="6" data-note-id="E">
           <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="6_0"></div>
           <div
@@ -1617,6 +1648,10 @@ onMounted(loadFrets)
               border-color: var(--vt-c-yellow);
               border-right: 2px solid var(--vt-c-black);
             }
+          }
+
+          &.pressed-hover {
+            background-color: var(--vt-c-yellow-hover);
           }
         }
       }
