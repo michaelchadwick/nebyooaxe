@@ -22,6 +22,15 @@ export default defineConfigWithVueTs(
   vueTsConfigs.recommended,
 
   {
+    ignores: ['dist/', 'node_modules/', 'test-results'],
+  },
+  {
+    rules: {
+      'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
+      'no-duplicate-imports': 'error',
+    },
+  },
+  {
     ...pluginPlaywright.configs['flat/recommended'],
     files: ['e2e/**/*.{test,spec}.{js,ts,jsx,tsx}'],
   },
