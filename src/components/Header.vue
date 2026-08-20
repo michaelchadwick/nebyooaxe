@@ -66,7 +66,28 @@ onMounted(fetchSites)
           aria-label="Click for links to more apps by neb.host"
           tabindex="-1"
         >
-          <img src="../assets/images/the_n_bw.svg" alt="" />
+          <!-- <metadata>Created by potrace 1.14, written by Peter Selinger 2001-2017</metadata>-->
+          <svg
+            version="1.0"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24px"
+            height="24px"
+            viewBox="0 0 800.000000 800.000000"
+            preserveAspectRatio="xMidYMid meet"
+          >
+            <g
+              transform="translate(0.000000,800.000000) scale(0.100000,-0.100000)"
+              fill="#000000"
+              stroke="none"
+            >
+              <path
+                d="M0 4000 l0 -4000 4000 0 4000 0 0 4000 0 4000 -4000 0 -4000 0 0
+            -4000z m1620 3692 l0 -157 2390 -2390 2390 -2390 0 2548 0 2547 725 0 725 0 0
+            -3850 0 -3850 -725 0 -725 0 0 178 0 177 -2390 2390 -2390 2390 0 -2568 0
+            -2567 -735 0 -735 0 0 3850 0 3850 735 0 735 0 0 -158z"
+              />
+            </g>
+          </svg>
         </button>
         <div id="nav-overlay" :class="{ show: showApps }">
           <div id="nav-content">
@@ -86,7 +107,7 @@ onMounted(fetchSites)
                 <footer id="footer-neb-host">
                   site by
                   <a
-                    style="color: #952828; font-family: 'Consolas', sans-serif; font-size: 14px"
+                    style="font-family: 'Consolas', sans-serif; font-size: 14px"
                     href="https://neb.host"
                     >neb.host</a
                   >
@@ -144,12 +165,14 @@ header {
   button {
     align-items: center;
     background-color: var(--header-button-color);
+    border-color: var(--color-text);
+    color: var(--color-text);
     display: flex;
     height: 40px;
 
     @media (hover: hover) {
       &:hover {
-        background-color: var(--vt-c-beige-light);
+        background-color: var(--header-button-hover-color);
       }
     }
   }
@@ -166,6 +189,9 @@ header {
     #button-nav img {
       height: 24px;
       width: 24px;
+    }
+    #button-nav svg g {
+      fill: var(--color-text);
     }
 
     #nav-overlay {
@@ -185,7 +211,7 @@ header {
       }
 
       #nav-content {
-        background-color: var(--vt-c-white);
+        background-color: var(--color-background);
         border-radius: 0;
         box-shadow: 3px 5px 5px rgb(0 0 0 / 15%);
         box-sizing: border-box;
@@ -199,11 +225,6 @@ header {
 
         @media (min-width: 415px) {
           width: 325px;
-        }
-
-        a {
-          color: var(--black);
-          text-decoration: none;
         }
 
         .container {
@@ -227,10 +248,11 @@ header {
             height: 30px;
             justify-content: left;
             padding: 4px 0 4px 18px;
+            text-decoration: none;
 
             @media (hover: hover) {
               &:hover {
-                background-color: #e9e9e9;
+                background-color: var(--color-background-mute);
               }
             }
           }
@@ -243,6 +265,10 @@ header {
           right: 16px;
           top: 16px;
           width: 24px;
+
+          a {
+            text-decoration: none;
+          }
 
           @media (hover: hover) {
             a:hover {
@@ -259,6 +285,7 @@ header {
   }
 
   .title {
+    color: var(--color-text);
     font-family: 'Changa Bold', sans-serif;
     font-weight: 700;
     font-size: 14px;
@@ -294,10 +321,10 @@ header {
 }
 
 #footer-neb-host {
-  background: var(--header-color);
+  background: var(--color-background-mute);
   border-top: 2px solid var(--vt-c-black);
   bottom: 0;
-  color: var(--vt-c-black);
+  color: var(--color-text);
   font-family: 'Consolas', sans-serif;
   font-size: 14px;
   font-weight: 500;

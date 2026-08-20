@@ -39,7 +39,7 @@ const modal = useModalStore()
   z-index: 1000;
 }
 .dialog {
-  background: var(--vt-c-white);
+  background: var(--color-background);
   padding: 1.5rem;
   border-radius: 0.3rem;
   max-width: 90vw;
