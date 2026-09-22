@@ -81,6 +81,10 @@ onMounted(() => {
 header {
   display: flex;
 
+  @media (min-width: 1200px) {
+    place-items: center;
+  }
+
   h1 {
     font-weight: 500;
     font-size: 2.6rem;
@@ -91,13 +95,11 @@ header {
 main {
   display: block;
   line-height: 1.5;
-  margin-top: 50px;
+  margin-top: 55px;
   z-index: 1;
-}
 
-@media (min-width: 1200px) {
-  header {
-    place-items: center;
+  @media (min-width: 768px) {
+    margin-top: 0;
   }
 }
 
