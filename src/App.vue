@@ -64,6 +64,10 @@ onMounted(() => {
     />
 
     <div id="note-stats" :key="appKey">
+      <div id="current-chord" :class="{ empty: !chord.length }">
+        <strong>Chord</strong>: {{ chord ? chord : '' }}
+      </div>
+
       <div id="current-frets" :class="{ empty: !frets.length }">
         <strong>Frets</strong>: {{ frets.length ? frets : '' }}
       </div>
@@ -75,9 +79,6 @@ onMounted(() => {
       </div>
       <div id="current-invls" :class="{ empty: !invls.length }">
         <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
-      </div>
-      <div id="current-chord" :class="{ empty: !chord.length }">
-        <strong>Chord</strong>: {{ chord ? chord : '' }}
       </div>
     </div>
   </main>
@@ -110,6 +111,14 @@ main {
 
   @media (min-width: 1200px) {
     font-size: 1rem;
+  }
+
+  #current-chord {
+    font-size: 1rem;
+
+    @media (min-width: 1200px) {
+      font-size: 1.2rem;
+    }
   }
 }
 
