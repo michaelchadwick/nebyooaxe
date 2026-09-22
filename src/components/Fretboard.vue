@@ -1649,10 +1649,6 @@ onMounted(loadFrets)
               border-right: 2px solid var(--vt-c-black);
             }
           }
-
-          &.pressed-hover {
-            background-color: var(--vt-c-yellow-hover);
-          }
         }
       }
 
