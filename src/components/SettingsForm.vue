@@ -13,31 +13,41 @@ function updateEnableFretSound() {
   <div>
     <h2>Axe Settings</h2>
     <div class="settings-form">
-      <label>
-        <input
-          type="checkbox"
-          :checked="settings.enableFretSound"
-          @change="updateEnableFretSound"
-        />
-        <span>Enable fret sound</span>
-      </label>
-      <label>
-        Fret Sound
-        <select v-model="settings.fretSoundType">
-          <option value="sine">sine</option>
-          <option value="square">square</option>
-          <option value="sawtooth">sawtooth</option>
-          <option value="triangle">triangle</option>
-        </select>
-      </label>
-      <label>
-        Strum Pattern
-        <select v-model="settings.strumPattern">
-          <option value="as-entered">as entered</option>
-          <option value="bottom-up">bottom up</option>
-          <option value="top-down">top down</option>
-        </select>
-      </label>
+      <fieldset>
+        <div class="settings-row">
+          <label> Enable Fret Sound </label>
+          <span>
+            <input
+              type="checkbox"
+              :checked="settings.enableFretSound"
+              @change="updateEnableFretSound"
+            />
+          </span>
+        </div>
+
+        <div class="settings-row">
+          <label> Fret Sound Type </label>
+          <span>
+            <select v-model="settings.fretSoundType">
+              <option value="sine">sine</option>
+              <option value="square">square</option>
+              <option value="sawtooth">sawtooth</option>
+              <option value="triangle">triangle</option>
+            </select>
+          </span>
+        </div>
+
+        <div class="settings-row">
+          <label> Strum Pattern </label>
+          <span>
+            <select v-model="settings.strumPattern">
+              <option value="as-entered">as entered</option>
+              <option value="bottom-up">bottom up</option>
+              <option value="top-down">top down</option>
+            </select>
+          </span>
+        </div>
+      </fieldset>
     </div>
   </div>
 </template>
@@ -46,5 +56,25 @@ function updateEnableFretSound() {
 .settings-form {
   display: flex;
   flex-direction: column;
+
+  fieldset {
+    border: 1px solid var(--color-border);
+    padding: 0.25rem;
+  }
+
+  .settings-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+
+    label {
+      background-color: var(--color-background);
+      font-weight: bold;
+    }
+
+    span {
+      background-color: var(--color-background-mute);
+    }
+  }
 }
 </style>
