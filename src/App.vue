@@ -12,11 +12,11 @@ const forceRerender = () => {
   appKey.value++
 }
 
+type ChordName = string
 type FretArray = string[]
-type IntervalsArray = number[][]
 type MidiArray = number[]
 type NoteArray = string[]
-type ChordName = string
+type IntervalsArray = number[][]
 
 const chord = ref<ChordName>('')
 const frets = ref<FretArray>([])
@@ -24,6 +24,9 @@ const midis = ref<MidiArray>([])
 const notes = ref<NoteArray>([])
 const invls = ref<IntervalsArray>([])
 
+function currentChord(newChord: ChordName[]): void {
+  chord.value = newChord.join(', ')
+}
 function currentFrets(newFrets: FretArray): void {
   frets.value = newFrets
 }
@@ -35,9 +38,6 @@ function currentNotes(newNotes: NoteArray): void {
 }
 function currentInvls(newInvls: IntervalsArray): void {
   invls.value = newInvls
-}
-function currentChord(newChord: ChordName[]): void {
-  chord.value = newChord.join(', ')
 }
 
 onMounted(() => {
@@ -57,21 +57,20 @@ onMounted(() => {
   <main>
     <Fretboard
       :key="appKey"
+      @current-chord="currentChord"
       @current-frets="currentFrets"
       @current-midis="currentMidis"
       @current-notes="currentNotes"
       @current-invls="currentInvls"
-      @current-chord="currentChord"
     />
 
     <NoteStats
+      :key="appKey"
       :chord="chord"
       :frets="frets"
       :midis="midis"
       :notes="notes"
       :invls="invls"
-      :app-key="appKey"
-      :key="appKey"
     />
   </main>
 

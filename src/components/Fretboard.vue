@@ -16,11 +16,11 @@ const ctx = new window.AudioContext()
 const fretsPressed = ref<string[]>([])
 
 const emit = defineEmits([
+  'currentChord',
   'currentFrets',
   'currentMidis',
   'currentNotes',
   'currentInvls',
-  'currentChord',
 ])
 
 type FretArray = string[]
@@ -174,10 +174,7 @@ function getChord(midiNums: MidiArray, useFlatNotation = true): ChordName[] {
       }
     }
 
-    emit(
-      'currentInvls',
-      possibleInvls.map((invl) => invl.join(',')),
-    )
+    emit('currentInvls', possibleInvls)
 
     if (!possibleChords.length) {
       const lowestNote = _pitchClassName(_midiToPitchClass(midiNums[0]), useFlatNotation)

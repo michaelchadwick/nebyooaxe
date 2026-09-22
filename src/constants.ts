@@ -136,6 +136,21 @@ export const MUSICAL_NOTES: Note[] = [
   new Note('Bb8', 7458.62, 118),
   new Note('B8', 7902.13, 119),
 ]
+export const INTERVAL_NAMES: string[] = [
+  'P1',
+  'm2',
+  'M2',
+  'm3',
+  'M3',
+  'P4',
+  't',
+  'P5',
+  'm6',
+  'M6',
+  'm7',
+  'M7',
+  'P8',
+]
 export const CHORD_PATTERNS: Record<string, string[]> = {
   // Triads
   '0,7': ['5'],
@@ -175,7 +190,9 @@ export const CHORD_PATTERNS: Record<string, string[]> = {
   '0,3,7,14': ['m(add9)'], // proper (min)add9
 
   // Extensions
+  '0,4,7,11,13': ['maj7(b9)'], // (b9)
   '0,4,7,11,14': ['maj9'], // 9th
+  '0,4,7,11,15': ['maj7(#9)'], // (#9)
   '0,2,4,7,11': ['maj9'],
   '0,3,7,10,14': ['dom9'],
   '0,3,7,10,14,21': ['dom13'],

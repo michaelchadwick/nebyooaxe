@@ -1,12 +1,37 @@
 <script setup lang="ts">
+import { INTERVAL_NAMES } from '@/constants'
+
 const props = defineProps({
-  chord: { type: String, default: '' },
-  frets: { type: Array, default: () => [] },
-  midis: { type: Array, default: () => [] },
-  notes: { type: Array, default: () => [] },
-  invls: { type: Array, default: () => [] },
   appKey: { type: [String, Number], default: null },
+  chord: { type: String, default: '' },
+  frets: { type: Array<string>, default: () => [] },
+  midis: { type: Array<number>, default: () => [] },
+  notes: { type: Array<string>, default: () => [] },
+  invls: { type: Array<number[]>, default: () => [] },
 })
+
+function invlsDisplay(invlGroups: number[][]) {
+  const numberGroups: string[] = []
+
+  invlGroups.forEach((invlGroup: number[]) => {
+    numberGroups.push(invlGroup.join(','))
+  })
+
+  return numberGroups
+}
+
+function iNumsToLbls(invlGroups: number[][]): string[] {
+  const labelGroups: string[] = []
+
+  invlGroups.forEach((invlGroup: number[]) => {
+    const labelString = invlGroup.map((invl: number) => {
+      return INTERVAL_NAMES[invl]
+    })
+    labelGroups.push(labelString.join(','))
+  })
+
+  return labelGroups
+}
 </script>
 
 <template>
@@ -27,7 +52,11 @@ const props = defineProps({
         <strong>Notes</strong>: {{ notes.length ? notes : '' }}
       </div>
       <div id="current-invls" :class="{ empty: !invls.length }">
-        <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
+        <strong>Intervals (Num)</strong>: {{ invls.length ? invlsDisplay(invls) : '' }}
+      </div>
+      <div id="current-ilbls" :class="{ empty: !invls.length }">
+        <strong>Intervals (Lbl)</strong>:
+        {{ invls.length ? iNumsToLbls(invls) : '' }}
       </div>
     </details>
   </div>
@@ -59,6 +88,10 @@ const props = defineProps({
       summary:hover {
         text-decoration: underline;
       }
+    }
+
+    div#current-ilbls {
+      white-space: break-spaces;
     }
   }
 }
