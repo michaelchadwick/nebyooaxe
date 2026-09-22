@@ -74,6 +74,9 @@ function updateEnableFretSound() {
 
     span {
       background-color: var(--color-background-mute);
+      display: inline-block;
+      min-width: 100px;
+      padding: 0.1em;
     }
   }
 }
