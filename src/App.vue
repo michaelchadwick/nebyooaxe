@@ -3,6 +3,7 @@ import { useSettingsStore } from '@/stores/settings'
 import { onMounted, ref } from 'vue'
 import Header from './components/Header.vue'
 import Fretboard from './components/Fretboard.vue'
+import NoteStats from './components/NoteStats.vue'
 import Modal from '@/components/Modal.vue'
 
 const appKey = ref(0)
@@ -17,11 +18,11 @@ type MidiArray = number[]
 type NoteArray = string[]
 type ChordName = string
 
+const chord = ref<ChordName>('')
 const frets = ref<FretArray>([])
 const midis = ref<MidiArray>([])
 const notes = ref<NoteArray>([])
 const invls = ref<IntervalsArray>([])
-const chord = ref<ChordName>('')
 
 function currentFrets(newFrets: FretArray): void {
   frets.value = newFrets
@@ -63,24 +64,15 @@ onMounted(() => {
       @current-chord="currentChord"
     />
 
-    <div id="note-stats" :key="appKey">
-      <div id="current-chord" :class="{ empty: !chord.length }">
-        <strong>Chord</strong>: {{ chord ? chord : '' }}
-      </div>
-
-      <div id="current-frets" :class="{ empty: !frets.length }">
-        <strong>Frets</strong>: {{ frets.length ? frets : '' }}
-      </div>
-      <div id="current-midis" :class="{ empty: !midis.length }">
-        <strong>Midis</strong>: {{ midis.length ? midis : '' }}
-      </div>
-      <div id="current-notes" :class="{ empty: !notes.length }">
-        <strong>Notes</strong>: {{ notes.length ? notes : '' }}
-      </div>
-      <div id="current-invls" :class="{ empty: !invls.length }">
-        <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
-      </div>
-    </div>
+    <NoteStats
+      :chord="chord"
+      :frets="frets"
+      :midis="midis"
+      :notes="notes"
+      :invls="invls"
+      :app-key="appKey"
+      :key="appKey"
+    />
   </main>
 
   <Modal />
@@ -102,24 +94,6 @@ main {
   line-height: 1.5;
   margin-top: 50px;
   z-index: 1;
-}
-
-#note-stats {
-  font-size: 0.9rem;
-  line-height: 1.2;
-  padding-top: 5px;
-
-  @media (min-width: 1200px) {
-    font-size: 1rem;
-  }
-
-  #current-chord {
-    font-size: 1rem;
-
-    @media (min-width: 1200px) {
-      font-size: 1.2rem;
-    }
-  }
 }
 
 @media (min-width: 1200px) {
