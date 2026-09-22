@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { useSettingsStore } from '@/stores/settings'
 import { onMounted, ref } from 'vue'
 import Header from './components/Header.vue'
 import Fretboard from './components/Fretboard.vue'
