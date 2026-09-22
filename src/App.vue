@@ -28,7 +28,7 @@ function currentChord(newChord: ChordName[]): void {
   chord.value = newChord.join(', ')
 }
 function currentFrets(newFrets: FretArray): void {
-  frets.value = newFrets
+  frets.value = Array.from(new Set(newFrets))
 }
 function currentMidis(newMidis: MidiArray): void {
   midis.value = newMidis
