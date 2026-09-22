@@ -15,18 +15,21 @@ const props = defineProps({
       <strong>Chord</strong>: {{ chord || '' }}
     </div>
 
-    <div id="current-frets" :class="{ empty: !frets.length }">
-      <strong>Frets</strong>: {{ frets.length ? frets : '' }}
-    </div>
-    <div id="current-midis" :class="{ empty: !midis.length }">
-      <strong>Midis</strong>: {{ midis.length ? midis : '' }}
-    </div>
-    <div id="current-notes" :class="{ empty: !notes.length }">
-      <strong>Notes</strong>: {{ notes.length ? notes : '' }}
-    </div>
-    <div id="current-invls" :class="{ empty: !invls.length }">
-      <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
-    </div>
+    <details>
+      <summary>Details: Frets, Midi, Notes, Intervals</summary>
+      <div id="current-frets" :class="{ empty: !frets.length }">
+        <strong>Frets</strong>: {{ frets.length ? frets : '' }}
+      </div>
+      <div id="current-midis" :class="{ empty: !midis.length }">
+        <strong>Midis</strong>: {{ midis.length ? midis : '' }}
+      </div>
+      <div id="current-notes" :class="{ empty: !notes.length }">
+        <strong>Notes</strong>: {{ notes.length ? notes : '' }}
+      </div>
+      <div id="current-invls" :class="{ empty: !invls.length }">
+        <strong>Intervals</strong>: {{ invls.length ? invls : '' }}
+      </div>
+    </details>
   </div>
 </template>
 
@@ -42,9 +45,20 @@ const props = defineProps({
 
   #current-chord {
     font-size: 1rem;
+    margin-bottom: 0.5rem;
 
     @media (min-width: 1200px) {
       font-size: 1.2rem;
+    }
+  }
+
+  details {
+    cursor: pointer;
+
+    @media (hover: hover) {
+      summary:hover {
+        text-decoration: underline;
+      }
     }
   }
 }
