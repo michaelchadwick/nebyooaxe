@@ -15,6 +15,13 @@ function updateEnableFretSound() {
     <div class="settings-form">
       <fieldset>
         <div class="settings-row">
+          <label> Fret Count </label>
+          <span>
+            <input v-model="settings.fretCount" type="number" min="12" max="24" />
+          </span>
+        </div>
+
+        <div class="settings-row">
           <label> Enable Fret Sound </label>
           <span>
             <input

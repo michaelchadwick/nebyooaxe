@@ -11,6 +11,7 @@ export const useSettingsStore = defineStore('nebyooaxe-settings', {
     fretSoundType: useStorage('axe-fret-sound-type', 'square' as OscType),
     strumPattern: useStorage('axe-strum-pattern', 'as-entered' as StrumPattern),
     currentFrets: useStorage('axe-current-frets', <string[]>[]),
+    fretCount: useStorage('axe-fret-count', 24),
   }),
   actions: {
     toggleEnableFretSound() {
@@ -24,6 +25,9 @@ export const useSettingsStore = defineStore('nebyooaxe-settings', {
     },
     updateCurrentFrets(currentFrets: FretArray) {
       this.currentFrets = currentFrets
+    },
+    updateFretCount(fretCount: number) {
+      this.fretCount = fretCount
     },
   },
 })

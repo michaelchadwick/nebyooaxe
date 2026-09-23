@@ -23,8 +23,6 @@ const emit = defineEmits([
   'currentInvls',
 ])
 
-const FRET_COUNT = 24
-
 type FretArray = string[]
 type MidiNote = number
 type PitchClass = number
@@ -444,7 +442,7 @@ onMounted(loadFrets)
     <div id="fretboard-numbers">
       <div></div>
       <div>0</div>
-      <div v-for="index in FRET_COUNT">{{ index }}</div>
+      <div v-for="index in settings.fretCount">{{ index }}</div>
     </div>
 
     <div id="fretboard">
@@ -460,7 +458,7 @@ onMounted(loadFrets)
       <div id="strings" v-on:mouseover="mouseHandler" v-on:mouseout="mouseHandler">
         <div class="string" data-string-id="6" data-note-id="E">
           <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="6_0"></div>
-          <template v-for="index in FRET_COUNT" :key="index">
+          <template v-for="index in settings.fretCount" :key="index">
             <div
               class="fret empty"
               @click="toggleFret"
@@ -472,7 +470,7 @@ onMounted(loadFrets)
         </div>
         <div class="string" data-string-id="5" data-note-id="B">
           <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="5_0"></div>
-          <template v-for="index in FRET_COUNT" :key="index">
+          <template v-for="index in settings.fretCount" :key="index">
             <div
               class="fret empty"
               @click="toggleFret"
@@ -484,7 +482,7 @@ onMounted(loadFrets)
         </div>
         <div class="string" data-string-id="4" data-note-id="G">
           <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="4_0"></div>
-          <template v-for="index in FRET_COUNT" :key="index">
+          <template v-for="index in settings.fretCount" :key="index">
             <div
               class="fret empty"
               @click="toggleFret"
@@ -496,7 +494,7 @@ onMounted(loadFrets)
         </div>
         <div class="string" data-string-id="3" data-note-id="D">
           <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="3_0"></div>
-          <template v-for="index in FRET_COUNT" :key="index">
+          <template v-for="index in settings.fretCount" :key="index">
             <div
               class="fret empty"
               @click="toggleFret"
@@ -508,7 +506,7 @@ onMounted(loadFrets)
         </div>
         <div class="string" data-string-id="2" data-note-id="A">
           <div class="fret open" @click="toggleFret" data-pressed="false" data-fret-id="2_0"></div>
-          <template v-for="index in FRET_COUNT" :key="index">
+          <template v-for="index in settings.fretCount" :key="index">
             <div
               class="fret empty"
               @click="toggleFret"
@@ -526,7 +524,7 @@ onMounted(loadFrets)
             data-note-id=""
             data-fret-id="1_0"
           ></div>
-          <template v-for="index in FRET_COUNT" :key="index">
+          <template v-for="index in settings.fretCount" :key="index">
             <div
               class="fret empty"
               @click="toggleFret"
