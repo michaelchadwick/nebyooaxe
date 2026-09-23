@@ -60,6 +60,28 @@ function toggleFret(event: PointerEvent): void {
   }
 }
 
+// unpress all frets on a string
+function clearString(stringId: string): void {
+  const stringFretsPressed: NodeList | null = getStringFretsPressed(stringId)
+
+  if (stringFretsPressed && stringFretsPressed.length) {
+    stringFretsPressed.forEach((fret: Node) => {
+      if (fret instanceof HTMLElement) {
+        fret.dataset.pressed = 'false'
+        fret.classList.remove('pressed')
+        fretsPressed.value = fretsPressed.value.filter(
+          (fretPressed) => fretPressed != fret.dataset.fretId,
+        )
+        if (!fret.classList.contains('open')) {
+          fret.classList.add('empty')
+        }
+
+        fret.innerHTML = ''
+      }
+    })
+  }
+}
+
 // toggle from unpressed to pressed: add note-bubble
 function toggleNoteOn(elem: HTMLElement) {
   const stringId: string | undefined = elem.parentElement?.dataset.stringId
@@ -68,25 +90,8 @@ function toggleNoteOn(elem: HTMLElement) {
   const dataset = elem.dataset
 
   if (stringId && fretId) {
-    const stringFretsPressed: NodeList | null = getStringFretsPressed(stringId)
+    clearString(stringId)
 
-    // remove all other pressed notes
-    if (stringFretsPressed && stringFretsPressed.length) {
-      stringFretsPressed.forEach((fret: Node) => {
-        if (fret instanceof HTMLElement) {
-          fret.dataset.pressed = 'false'
-          fret.classList.remove('pressed')
-          fretsPressed.value = fretsPressed.value.filter(
-            (fretPressed) => fretPressed != fret.dataset.fretId,
-          )
-          if (!fret.classList.contains('open')) {
-            fret.classList.add('empty')
-          }
-
-          fret.innerHTML = ''
-        }
-      })
-    }
     dataset.pressed = 'true'
     classes?.remove('empty')
     classes?.add('pressed', 'note-bubble')
