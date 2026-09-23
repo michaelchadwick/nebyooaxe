@@ -285,6 +285,52 @@ function playChord(fretIds: string[]): void {
   })
 }
 
+function moveNotes(fretsToMove: string[], mod: number): void {
+  const arr = Array.from(fretsToMove)
+  const atMin = arr.filter((f) => f.slice(2) == '0').length
+
+  if (atMin == 0) {
+    const fretsToPress: string[] = []
+
+    fretsToMove.forEach((f) => {
+      const str = f.at(0)
+      const fret = parseInt(f.slice(2)) + mod
+      fretsToPress.push(`${str}_${fret}`)
+    })
+
+    const frets: NodeList = document.querySelectorAll(`.fret`)
+
+    frets.forEach((fret: Node) => {
+      if (fret instanceof HTMLElement && fret.dataset.fretId) {
+        if (fretsToPress.includes(fret.dataset.fretId)) {
+          const stringId = fret.parentElement?.dataset.stringId
+          const fretId = fret.dataset.fretId
+
+          if (stringId !== undefined) {
+            clearString(stringId)
+          }
+
+          fret.dataset.pressed = 'true'
+          fret.classList.remove('empty')
+          fret.classList.add('pressed', 'note-bubble')
+          fretsPressed.value = [...fretsPressed.value, fretId ?? '']
+          console.log('fretsPressed', fretsPressed.value)
+
+          const noteIndex = Number(fretId.slice(2)) % 12
+
+          if (stringId !== undefined && fretId !== undefined) {
+            if (FRET_NOTE[stringId] !== undefined && FRET_NOTE[stringId][noteIndex] !== undefined) {
+              fret.innerHTML = FRET_NOTE[stringId][noteIndex]
+            }
+          }
+        }
+      }
+    })
+
+    emitNoteStatUpdates()
+  }
+}
+
 function resetFrets(): void {
   const strings: string[] = ['6', '5', '4', '3', '2', '1']
 
@@ -315,7 +361,7 @@ function resetFrets(): void {
 
 function emitNoteStatUpdates(): void {
   const sortedFrets: FretArray = fretsPressed.value ? [...fretsPressed.value].sort() : []
-  settings.currentFrets = sortedFrets
+  settings.currentFrets = Array.from(new Set(sortedFrets))
   emit('currentFrets', sortedFrets)
 
   const noteArray: NoteArray = getNotes()
@@ -435,11 +481,17 @@ onMounted(loadFrets)
 
 <template>
   <div id="buttons">
+    <div id="lower-notes">
+      <button @click="moveNotes(fretsPressed, -1)" :disabled="!fretsPressed.length"><</button>
+    </div>
     <div id="play-chord">
       <button @click="playChord(fretsPressed)" :disabled="!fretsPressed.length">Strum Notes</button>
     </div>
     <div id="reset-notes">
       <button @click="resetFrets" :disabled="!fretsPressed.length">Reset Frets</button>
+    </div>
+    <div id="raise-notes">
+      <button @click="moveNotes(fretsPressed, 1)" :disabled="!fretsPressed.length">></button>
     </div>
   </div>
 
