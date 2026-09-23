@@ -598,8 +598,8 @@ onMounted(loadFrets)
   }
 
   #strings {
-    border-bottom: 2px solid var(--vt-c-black-true);
-    border-top: 2px solid var(--vt-c-black-true);
+    border-bottom: 2px solid var(--color-border);
+    border-top: 2px solid var(--color-border);
   }
 
   .string {
