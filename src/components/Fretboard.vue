@@ -288,8 +288,9 @@ function playChord(fretIds: string[]): void {
 function moveNotes(fretsToMove: string[], mod: number): void {
   const arr = Array.from(fretsToMove)
   const atMin = arr.filter((f) => f.slice(2) == '0').length
+  const atMax = arr.filter((f) => f.slice(2) == settings.fretCount.toString()).length
 
-  if (atMin == 0) {
+  if ((atMin == 0 && mod == -1) || (atMax == 0 && mod == 1)) {
     const fretsToPress: string[] = []
 
     fretsToMove.forEach((f) => {
