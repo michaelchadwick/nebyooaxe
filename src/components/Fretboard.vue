@@ -293,7 +293,7 @@ function moveNotes(fretsToMove: string[], mod: number): void {
     const fretsToPress: string[] = []
 
     fretsToMove.forEach((f) => {
-      const str = f.at(0)
+      const str = f.slice(0, 1)
       const fret = parseInt(f.slice(2)) + mod
       fretsToPress.push(`${str}_${fret}`)
     })
@@ -314,7 +314,6 @@ function moveNotes(fretsToMove: string[], mod: number): void {
           fret.classList.remove('empty')
           fret.classList.add('pressed', 'note-bubble')
           fretsPressed.value = [...fretsPressed.value, fretId ?? '']
-          console.log('fretsPressed', fretsPressed.value)
 
           const noteIndex = Number(fretId.slice(2)) % 12
 
