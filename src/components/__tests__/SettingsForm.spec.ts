@@ -1,9 +1,9 @@
 import { describe, it, expect, beforeEach } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
 import { mount } from '@vue/test-utils'
-import Fretboard from '../Fretboard.vue'
+import SettingsForm from '../SettingsForm.vue'
 
-describe('Fretboard', () => {
+describe('SettingsForm', () => {
   beforeEach(() => {
     // creates a fresh pinia and makes it active
     // so it's automatically picked up by any useStore() call
@@ -12,13 +12,10 @@ describe('Fretboard', () => {
   })
 
   it('renders properly', () => {
-    const wrapper = mount(Fretboard)
-    const buttonsText = '<Strum NotesReset Frets>'
-    const fretNumbers = Array(25)
-      .fill(0)
-      .map((_, i) => i.toString())
-      .join('')
-    const fretNotes = 'E4B3G3D3A2E2'
-    expect(wrapper.text()).toEqual(buttonsText + fretNumbers + fretNotes)
+    const wrapper = mount(SettingsForm)
+    const headerText = 'Axe Settings '
+    const controls =
+      'Fret Count  Enable Fret Sound  Fret Sound Type sinesquaresawtoothtriangle Strum Pattern as enteredbottom uptop down'
+    expect(wrapper.text()).toEqual(headerText + controls)
   })
 })
