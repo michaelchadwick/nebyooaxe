@@ -148,6 +148,13 @@ onMounted(fetchSites)
 
 <style scoped>
 header {
+  display: flex;
+
+  @media (min-width: 1200px) {
+    place-items: center;
+  }
+}
+header {
   align-items: center;
   background-color: var(--header-color);
   border-bottom: 1px solid var(--base-color);

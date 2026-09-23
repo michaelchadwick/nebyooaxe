@@ -77,29 +77,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-header {
-  display: flex;
-
-  @media (min-width: 1200px) {
-    place-items: center;
-  }
-
-  h1 {
-    font-weight: 500;
-    font-size: 2.6rem;
-    position: relative;
-  }
-}
-
 main {
   display: block;
   line-height: 1.5;
-  margin-top: 55px;
+  margin-top: 65px;
   z-index: 1;
-
-  @media (min-width: 768px) {
-    margin-top: 0;
-  }
 }
 
 footer {

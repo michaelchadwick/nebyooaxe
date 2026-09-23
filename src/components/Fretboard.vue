@@ -544,7 +544,7 @@ onMounted(loadFrets)
   display: flex;
   gap: 5px;
   justify-content: center;
-  padding-bottom: 1em;
+  padding-bottom: 0.5rem;
 }
 
 #fretboard-viewport {
