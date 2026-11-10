@@ -18,17 +18,17 @@ const fretsPressed = ref<string[]>([])
 const emit = defineEmits([
   'currentChord',
   'currentFrets',
+  'currentInvls',
   'currentMidis',
   'currentNotes',
-  'currentInvls',
 ])
 
-type FretArray = string[]
-type MidiNote = number
-type PitchClass = number
-type MidiArray = MidiNote[]
-type NoteArray = Note[]
 type ChordName = string
+type FretArray = string[]
+type MidiArray = MidiNote[]
+type MidiNote = number
+type NoteArray = Note[]
+type PitchClass = number
 
 function isOscType(v: any): v is OscType {
   return ['sine', 'square', 'triangle', 'sawtooth'].includes(v)

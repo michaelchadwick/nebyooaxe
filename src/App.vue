@@ -13,15 +13,15 @@ const forceRerender = () => {
 
 type ChordName = string
 type FretArray = string[]
+type IntervalsArray = number[][]
 type MidiArray = number[]
 type NoteArray = string[]
-type IntervalsArray = number[][]
 
 const chord = ref<ChordName>('')
 const frets = ref<FretArray>([])
+const invls = ref<IntervalsArray>([])
 const midis = ref<MidiArray>([])
 const notes = ref<NoteArray>([])
-const invls = ref<IntervalsArray>([])
 
 function currentChord(newChord: ChordName[]): void {
   chord.value = newChord.join(', ')
@@ -29,14 +29,14 @@ function currentChord(newChord: ChordName[]): void {
 function currentFrets(newFrets: FretArray): void {
   frets.value = Array.from(new Set(newFrets))
 }
+function currentInvls(newInvls: IntervalsArray): void {
+  invls.value = newInvls
+}
 function currentMidis(newMidis: MidiArray): void {
   midis.value = newMidis
 }
 function currentNotes(newNotes: NoteArray): void {
   notes.value = newNotes
-}
-function currentInvls(newInvls: IntervalsArray): void {
-  invls.value = newInvls
 }
 
 onMounted(() => {
@@ -58,18 +58,18 @@ onMounted(() => {
       :key="appKey"
       @current-chord="currentChord"
       @current-frets="currentFrets"
+      @current-invls="currentInvls"
       @current-midis="currentMidis"
       @current-notes="currentNotes"
-      @current-invls="currentInvls"
     />
 
     <NoteStats
       :key="appKey"
       :chord="chord"
       :frets="frets"
+      :invls="invls"
       :midis="midis"
       :notes="notes"
-      :invls="invls"
     />
   </main>
 
