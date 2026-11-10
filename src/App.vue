@@ -4,15 +4,13 @@ import Header from './components/Header.vue'
 import Fretboard from './components/Fretboard.vue'
 import NoteStats from './components/NoteStats.vue'
 import Modal from '@/components/Modal.vue'
+import Fret from '@/fret'
 
 const appKey = ref(0)
-
-const forceRerender = () => {
-  appKey.value++
-}
+const forceRerender = () => appKey.value++
 
 type ChordName = string
-type FretArray = string[]
+type FretArray = Fret[]
 type IntervalsArray = number[][]
 type MidiArray = number[]
 type NoteArray = string[]
@@ -27,7 +25,7 @@ function currentChord(newChord: ChordName[]): void {
   chord.value = newChord.join(', ')
 }
 function currentFrets(newFrets: FretArray): void {
-  frets.value = Array.from(new Set(newFrets))
+  frets.value = Array.from(new Set(newFrets.map((f) => f.toString()))).map(Fret.fromString)
 }
 function currentInvls(newInvls: IntervalsArray): void {
   invls.value = newInvls

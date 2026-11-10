@@ -1,10 +1,11 @@
 <script setup lang="ts">
 import { INTERVAL_NAMES } from '@/constants'
+import Fret from '@/fret'
 
 const props = defineProps({
   appKey: { type: [String, Number], default: null },
   chord: { type: String, default: '' },
-  frets: { type: Array<string>, default: () => [] },
+  frets: { type: Array<Fret>, default: () => [] },
   invls: { type: Array<number[]>, default: () => [] },
   midis: { type: Array<number>, default: () => [] },
   notes: { type: Array<string>, default: () => [] },
@@ -43,7 +44,7 @@ function iNumsToLbls(invlGroups: number[][]): string[] {
     <details>
       <summary>Details: Frets, Midi, Notes, Intervals</summary>
       <div id="current-frets" :class="{ empty: !frets.length }">
-        <strong>Frets</strong>: {{ frets.length ? frets : '' }}
+        <strong>Frets</strong>: {{ frets.length ? frets.map((f) => f.toString()).join(', ') : '' }}
       </div>
       <div id="current-midis" :class="{ empty: !midis.length }">
         <strong>Midis</strong>: {{ midis.length ? midis : '' }}
