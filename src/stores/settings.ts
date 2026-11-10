@@ -2,9 +2,8 @@
 import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import type { OscType, StrumPattern } from '@/types'
-import Fret from '@/fret'
 
-type FretArray = Fret[]
+type FretArray = string[]
 
 export const useSettingsStore = defineStore('nebyooaxe-settings', {
   state: () => ({
@@ -12,7 +11,7 @@ export const useSettingsStore = defineStore('nebyooaxe-settings', {
     fretSoundType: useStorage('axe-fret-sound-type', 'square' as OscType),
     strumPattern: useStorage('axe-strum-pattern', 'as-entered' as StrumPattern),
     strumDelay: useStorage('axe-strum-delay', 50),
-    currentFrets: useStorage('axe-current-frets', <Fret[]>[]),
+    currentFrets: useStorage('axe-current-frets', <string[]>[]),
     fretCount: useStorage('axe-fret-count', 24),
   }),
   actions: {

@@ -58,7 +58,7 @@ function updateEnableFretSound() {
         <div class="settings-row">
           <label> Strum Delay (ms) </label>
           <span>
-            <input v-model="settings.strumDelay" type="number" min="50" max="250" />
+            <input v-model="settings.strumDelay" type="number" min="10" max="250" />
           </span>
         </div>
       </fieldset>
