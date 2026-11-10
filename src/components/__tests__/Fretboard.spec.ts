@@ -13,7 +13,7 @@ describe('Fretboard', () => {
 
   it('renders properly', () => {
     const wrapper = mount(Fretboard)
-    const buttonsText = '<Strum NotesReset Frets>'
+    const buttonsText = '< Strum NotesReset Frets >'
     const fretNumbers = Array(25)
       .fill(0)
       .map((_, i) => i.toString())

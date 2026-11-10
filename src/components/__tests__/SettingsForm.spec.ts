@@ -15,7 +15,7 @@ describe('SettingsForm', () => {
     const wrapper = mount(SettingsForm)
     const headerText = 'Axe Settings '
     const controls =
-      'Fret Count  Enable Fret Sound  Fret Sound Type sinesquaresawtoothtriangle Strum Pattern as enteredbottom uptop down'
+      'Fret Count  Enable Fret Sound  Fret Sound Type sinesquaresawtoothtriangle Strum Pattern as enteredbottom uptop down Strum Delay (ms)'
     expect(wrapper.text()).toEqual(headerText + controls)
   })
 })
