@@ -5,9 +5,9 @@ const props = defineProps({
   appKey: { type: [String, Number], default: null },
   chord: { type: String, default: '' },
   frets: { type: Array<string>, default: () => [] },
+  invls: { type: Array<number[]>, default: () => [] },
   midis: { type: Array<number>, default: () => [] },
   notes: { type: Array<string>, default: () => [] },
-  invls: { type: Array<number[]>, default: () => [] },
 })
 
 function invlsDisplay(invlGroups: number[][]) {
@@ -52,7 +52,8 @@ function iNumsToLbls(invlGroups: number[][]): string[] {
         <strong>Notes</strong>: {{ notes.length ? notes : '' }}
       </div>
       <div id="current-invls" :class="{ empty: !invls.length }">
-        <strong>Intervals (Num)</strong>: {{ invls.length ? invlsDisplay(invls) : '' }}
+        <strong>Intervals (Num)</strong>:
+        {{ invls.length ? invlsDisplay(invls) : '' }}
       </div>
       <div id="current-ilbls" :class="{ empty: !invls.length }">
         <strong>Intervals (Lbl)</strong>:
