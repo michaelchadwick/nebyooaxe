@@ -184,6 +184,13 @@ header {
     }
   }
 
+  @media (min-width: 768px) {
+    .menu-left,
+    .menu-right {
+      width: 70px;
+    }
+  }
+
   .menu-left {
     align-items: center;
     display: flex;
@@ -191,7 +198,6 @@ header {
     justify-content: flex-start;
     margin: 0;
     padding: 0;
-    width: 70px;
 
     #button-nav img {
       height: 24px;
@@ -310,7 +316,6 @@ header {
   .menu-right {
     display: flex;
     justify-content: flex-end;
-    width: 70px;
 
     button#button-settings {
       display: flex;

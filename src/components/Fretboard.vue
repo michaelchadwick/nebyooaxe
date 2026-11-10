@@ -482,7 +482,13 @@ onMounted(loadFrets)
 <template>
   <div id="buttons">
     <div id="lower-notes">
-      <button @click="moveNotes(fretsPressed, -1)" :disabled="!fretsPressed.length"><</button>
+      <button
+        @click="moveNotes(fretsPressed, -1)"
+        :disabled="!fretsPressed.length"
+        title="Move Notes Left"
+      >
+        <
+      </button>
     </div>
     <div id="play-chord">
       <button @click="playChord(fretsPressed)" :disabled="!fretsPressed.length">Strum Notes</button>
@@ -491,7 +497,13 @@ onMounted(loadFrets)
       <button @click="resetFrets" :disabled="!fretsPressed.length">Reset Frets</button>
     </div>
     <div id="raise-notes">
-      <button @click="moveNotes(fretsPressed, 1)" :disabled="!fretsPressed.length">></button>
+      <button
+        @click="moveNotes(fretsPressed, 1)"
+        :disabled="!fretsPressed.length"
+        title="Move Notes Right"
+      >
+        >
+      </button>
     </div>
   </div>
 
@@ -602,6 +614,10 @@ onMounted(loadFrets)
   gap: 5px;
   justify-content: center;
   padding-bottom: 0.5rem;
+
+  button {
+    height: auto;
+  }
 }
 
 #fretboard-viewport {
