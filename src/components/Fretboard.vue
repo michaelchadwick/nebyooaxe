@@ -277,7 +277,7 @@ function playChord(fretIds: string[]): void {
   if (fretsToPlay[0]) {
     playNote(fretsToPlay[0])
   }
-  let delay = 50
+  let delay = settings.strumDelay
   let index = 1
   fretsToPlay.slice(1).forEach((fretId) => {
     setTimeout(() => playNote(fretId), delay * index)
