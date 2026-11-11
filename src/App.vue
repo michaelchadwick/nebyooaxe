@@ -24,8 +24,8 @@ const notes = ref<NoteArray>([])
 function currentChord(newChord: ChordName[]): void {
   chord.value = newChord.join(', ')
 }
-function currentFrets(newFrets: FretArray): void {
-  frets.value = Array.from(new Set(newFrets))
+function currentFrets(newFrets: string[]): void {
+  frets.value = Array.from(new Set(newFrets)).map(Fret.fromString)
 }
 function currentInvls(newInvls: IntervalsArray): void {
   invls.value = newInvls

@@ -33,12 +33,24 @@ function iNumsToLbls(invlGroups: number[][]): string[] {
 
   return labelGroups
 }
+
+function fretsToTab(frets: Fret[]): string {
+  const strings = [1, 2, 3, 4, 5, 6]
+  const tabArray = strings.map((stringNum) => {
+    const fret = frets.find((f) => f.str === stringNum.toString())
+    return fret ? fret.offset : 'x'
+  })
+  return tabArray.join('')
+}
 </script>
 
 <template>
   <div id="note-stats" :key="appKey">
     <div id="current-chord" :class="{ empty: !chord.length }">
       <strong>Chord</strong>: {{ chord || '' }}
+    </div>
+    <div id="current-tab" :class="{ empty: !frets.length }">
+      <strong>Tab</strong>: {{ frets.length ? fretsToTab(frets) : '' }}
     </div>
 
     <details>
@@ -74,7 +86,8 @@ function iNumsToLbls(invlGroups: number[][]): string[] {
     font-size: 1rem;
   }
 
-  #current-chord {
+  #current-chord,
+  #current-tab {
     font-size: 1rem;
     margin-bottom: 0.5rem;
 

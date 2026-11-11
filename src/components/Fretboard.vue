@@ -358,9 +358,8 @@ function resetFrets(): void {
 }
 
 function emitNoteStatUpdates(): void {
-  const sortedFrets: Fret[] = [...fretsPressed.value].sort((a, b) =>
-    a.toString().localeCompare(b.toString()),
-  )
+  const frets = [...fretsPressed.value]
+  const sortedFrets: Fret[] = frets.sort((a, b) => a.toString().localeCompare(b.toString()))
   const fretsToStore = Array.from(new Set(sortedFrets.map((f) => f.toString())))
 
   settings.currentFrets = fretsToStore
